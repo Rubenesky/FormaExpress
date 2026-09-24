@@ -34,6 +34,16 @@ class UserFactory extends Factory
     }
 
     /**
+     * Empleado con rol de administrador.
+     */
+    public function administrador(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'rol' => 'administrador',
+        ]);
+    }
+
+    /**
      * Indicate that the model's email address should be unverified.
      */
     public function unverified(): static

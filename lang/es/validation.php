@@ -49,6 +49,10 @@ return [
         'name' => 'nombre',
         'email' => 'correo electrónico',
         'password' => 'contraseña',
+        'titulo' => 'título',
+        'descripcion' => 'descripción',
+        'contenido' => 'contenido',
+        'orden' => 'orden',
     ],
 
 ];

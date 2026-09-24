@@ -29,7 +29,11 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav me-auto">
-
+                        @can('administrar')
+                            <li class="nav-item">
+                                <a class="nav-link @if (request()->routeIs('cursos.*')) active @endif" href="{{ route('cursos.index') }}">Cursos</a>
+                            </li>
+                        @endcan
                     </ul>
 
                     <!-- Right Side Of Navbar -->
@@ -72,6 +76,17 @@
         </nav>
 
         <main class="py-4">
+            @if (session('status') || session('error'))
+                <div class="container">
+                    @if (session('status'))
+                        <div class="alert alert-success" role="alert">{{ session('status') }}</div>
+                    @endif
+                    @if (session('error'))
+                        <div class="alert alert-danger" role="alert">{{ session('error') }}</div>
+                    @endif
+                </div>
+            @endif
+
             @yield('content')
         </main>
     </div>
