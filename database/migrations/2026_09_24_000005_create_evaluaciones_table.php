@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('curso_id')->constrained('cursos')->cascadeOnDelete();
             $table->string('titulo');
-            $table->decimal('nota_minima', 4, 2)->default(5.00);
+            // Escala 0-10. Por defecto 8 (80%), ajustable en cada evaluación.
+            $table->decimal('nota_minima', 4, 2)->default(8.00);
             $table->timestamps();
         });
     }

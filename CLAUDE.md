@@ -19,24 +19,46 @@ cambio de personal.
   en algo, sin editar nada.
 
 ## Stack (cerrado, no proponer alternativas sin preguntar)
-- Backend: PHP 8 + Laravel, con **Blade tradicional** — NADA de frontend
+- Backend: PHP 8.3 + Laravel 13, con **Blade tradicional** — NADA de frontend
   desacoplado (sin Vue, sin React, sin SPA). Esto es una decisión deliberada para
   mantener la instalación simple, no un descuido.
 - Base de datos: MySQL 8.
-- Frontend: HTML5, CSS3, Bootstrap. JS solo el mínimo para validar formularios.
+- Frontend: HTML5, CSS3, Bootstrap 5.3 **desde CDN** (jsDelivr, con SRI) en
+  `layouts/app.blade.php`. JS solo el mínimo para validar formularios.
+  **Sin Node, npm ni Vite**: la instalación solo necesita PHP y MySQL.
+  **Sin Tailwind.**
+- Idioma: español (`APP_LOCALE=es`). Textos de la interfaz en `lang/es.json`,
+  mensajes de validación/auth en `lang/es/*.php`.
+- Auth: laravel/ui con preset Bootstrap (no Breeze, que solo genera Tailwind).
 - PDF de certificados: DomPDF.
 - Tests: PHPUnit.
 - Entorno local: Laragon. Control de versiones: Git/GitHub.
 
-## Modelo de datos (mínimo ya cerrado, 8 tablas, ninguna aislada)
-- empleados
+## Modelo de datos (11 tablas de dominio, ninguna aislada)
+Ampliado de 8 a 11 al escribir las migraciones; se formaliza en la Tarea 2.
+- empleados — **es la tabla de usuarios** (login). Columnas de auth en inglés
+  (name, email, password) porque Laravel las espera; `rol` ENUM
+  administrador/empleado/encargado. El modelo es `App\Models\User` con
+  `$table = 'empleados'`.
 - cursos
 - lecciones (FK curso)
+- asignaciones_curso (FK empleado + curso, fecha_asignacion; única por par)
 - progreso_lecciones (FK empleado + lección, fecha_finalizacion)
-- evaluaciones (FK curso o lección)
-- resultados_evaluacion (FK empleado + evaluación, nota)
-- certificados (FK empleado + curso, fecha_emision)
+- evaluaciones (FK **solo curso** — confirmado, no por lección; nota_minima
+  en escala 0-10, **8.00 por defecto**, ajustable por evaluación)
+- preguntas (FK evaluación)
+- opciones (FK pregunta, es_correcta)
+- resultados_evaluacion (FK empleado + evaluación, nota). Intentos
+  **ilimitados** (confirmado): se guarda cada intento; el certificado se emite
+  con el primer aprobado.
+- certificados (FK empleado + curso, fecha_emision; único por par)
 - insignias (FK empleado, hito conseguido)
+
+Borrados: cascada dentro de la estructura del curso (lecciones, evaluaciones,
+preguntas, opciones); el historial del empleado bloquea borrados.
+
+Pendiente para la Tarea 2: tabla de registro de consultas (RGPD), insignias
+como catálogo + relación, usuario MySQL propio para la app en vez de root.
 
 ## Funcionalidad
 - CRUD de cursos y lecciones (administrador).
@@ -72,6 +94,18 @@ así que el backend no se toca de lenguaje bajo ningún concepto.
   usuarios/roles/privilegios de MySQL.
 - Más adelante (Unidad 3+): Tarea 3 — desarrollo completo, guía de instalación,
   manual de usuario, batería de pruebas.
+
+## Entorno de este equipo (no es la guía de instalación)
+- PHP del proyecto: `C:\laragon\bin\php\php-8.3.35-Win32-vs16-x64\php.exe`.
+  El `php` del PATH es el 8.1 de XAMPP (lo usan otros proyectos) y **no sirve**
+  para Laravel 13: invocar siempre con la ruta completa.
+- Composer: `<php 8.3> C:\composer\composer.phar ...`.
+- MySQL en 127.0.0.1:3306 es el servicio de Windows `MySQL80` (8.0.34), no el de
+  Laragon. BD `formaexpress`, usuario root sin contraseña (solo local).
+- Administrador de prueba: `php artisan db:seed` crea admin@formaexpress.test /
+  admin1234 (el registro público solo crea empleados).
+- Tests: `artisan test` usa SQLite en memoria (pdo_sqlite activado en el php.ini
+  de PHP 8.3).
 
 ## Metodología
 Incremental por módulos, en este orden: (1) cursos y lecciones, (2) progreso y
