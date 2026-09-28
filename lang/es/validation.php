@@ -13,6 +13,7 @@ return [
     */
 
     'accepted' => 'Debes aceptar el campo :attribute.',
+    'array' => 'El campo :attribute no tiene un formato válido.',
     'between' => [
         'numeric' => 'El campo :attribute debe estar entre :min y :max.',
         'string' => 'El campo :attribute debe tener entre :min y :max caracteres.',
@@ -53,6 +54,12 @@ return [
         'descripcion' => 'descripción',
         'contenido' => 'contenido',
         'orden' => 'orden',
+        'empleado_id' => 'empleado',
+        'nota_minima' => 'nota mínima',
+        'enunciado' => 'enunciado',
+        'opciones' => 'opciones',
+        'opciones.*' => 'opción',
+        'correcta' => 'opción correcta',
     ],
 
 ];

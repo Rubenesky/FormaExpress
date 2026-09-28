@@ -44,18 +44,28 @@ Ampliado de 8 a 11 al escribir las migraciones; se formaliza en la Tarea 2.
 - lecciones (FK curso)
 - asignaciones_curso (FK empleado + curso, fecha_asignacion; única por par)
 - progreso_lecciones (FK empleado + lección, fecha_finalizacion)
-- evaluaciones (FK **solo curso** — confirmado, no por lección; nota_minima
-  en escala 0-10, **8.00 por defecto**, ajustable por evaluación)
+- evaluaciones (FK **solo curso**, **única por curso**: índice único en
+  curso_id; nota_minima en escala 0-10, **8.00 por defecto**, ajustable por
+  evaluación). **Decisión del usuario, cerrada: las evaluaciones van SOLO por
+  curso, nunca por lección. No reabrir.**
 - preguntas (FK evaluación)
 - opciones (FK pregunta, es_correcta)
-- resultados_evaluacion (FK empleado + evaluación, nota). Intentos
+- resultados_evaluacion (FK empleado + evaluación, nota, **aprobado**). Intentos
   **ilimitados** (confirmado): se guarda cada intento; el certificado se emite
   con el primer aprobado.
+
+Migraciones añadidas en el módulo 2 (decididas por el usuario):
+`2026_09_28_000001` unique(evaluaciones.curso_id) y `2026_09_28_000002`
+resultados_evaluacion.aprobado (boolean: se guarda con la nota mínima vigente
+en ese intento, así que cambiar nota_minima no altera intentos pasados).
 - certificados (FK empleado + curso, fecha_emision; único por par)
 - insignias (FK empleado, hito conseguido)
 
 Borrados: cascada dentro de la estructura del curso (lecciones, evaluaciones,
-preguntas, opciones); el historial del empleado bloquea borrados.
+preguntas, opciones); el historial del empleado bloquea borrados (FK RESTRICT:
+el controlador captura el error 23000 y muestra un mensaje, nunca un 500).
+Excepción: **ninguna FK impide desasignar un curso con progreso**; se comprueba
+en la app (`Curso::tieneProgresoDe()`), decisión del usuario.
 
 Pendiente para la Tarea 2: tabla de registro de consultas (RGPD), insignias
 como catálogo + relación, usuario MySQL propio para la app en vez de root.
@@ -68,6 +78,53 @@ como catálogo + relación, usuario MySQL propio para la app en vez de root.
 - Certificado en PDF al superar un curso.
 - Insignias automáticas por hitos (ej. completar 5 cursos, nota máxima en una
   evaluación) — lógica en SQL/PHP, sin IA ni servicios externos.
+
+## Estado por módulos (Tarea 3)
+- **Módulo 1 — cursos y lecciones: hecho.**
+- **Módulo 2 — asignación, progreso y evaluaciones: hecho.**
+- Módulo 3 — certificados e insignias: pendiente. En el módulo 2 no se emite
+  nada: solo queda registrado cada resultado.
+
+### Autorización (Gates en `AppServiceProvider`, aplicados con `can:` en rutas)
+- `administrar`: rol administrador (cursos, lecciones, asignaciones, evaluación).
+- `estudiar`: rol empleado ("Mis cursos").
+- `ver-curso` / `ver-leccion`: empleado con el curso asignado.
+- `hacer-evaluacion`: empleado con el curso asignado, curso con **al menos una
+  lección** (decisión del usuario), evaluación con al menos una pregunta y
+  **todas las lecciones completadas**.
+- El rol encargado aún no tiene pantallas (403 en todo).
+
+### Reglas de negocio de las evaluaciones (fijadas por el usuario)
+- Una evaluación por curso.
+- Solo preguntas de opción única: mínimo 2 opciones y exactamente 1 correcta
+  (lo valida `PreguntaRequest`; el formulario tiene 6 huecos y un radio).
+- Nota = aciertos / total de preguntas × 10, redondeada a 2 decimales, sin
+  penalización por fallo. Aprobado si nota >= nota_minima (comparado en
+  céntimos enteros: `Evaluacion::aprueba()`).
+- Intentos ilimitados; cada intento es una fila de resultados_evaluacion.
+- Solo se puede hacer con el curso asignado, con al menos una lección y el 100%
+  de las lecciones completadas (un curso sin lecciones no ofrece la evaluación). Todas las preguntas son obligatorias (un envío incompleto no
+  cuenta como intento).
+- Corrección en servidor (`Evaluacion::corregir()`): ni el HTML ni ningún dato
+  enviado al empleado contiene `es_correcta` (además está en `#[Hidden]`).
+- Tras enviar: nota, aprobado/suspendido y qué preguntas falló, sin decir cuál
+  era la correcta (se muestra una vez, vía flash).
+
+### Limitaciones conocidas
+- **Editar (o borrar) preguntas de una evaluación con resultados existentes
+  está permitido y cambia el significado de las notas pasadas.** Las pantallas
+  del administrador lo avisan, pero no lo impiden.
+- Salida siempre con `{{ }}`; los saltos de línea se conservan con CSS
+  `white-space: pre-line`, no con `nl2br` (que obligaría a usar `{!! !!}`).
+
+### Resuelto (no reabrir)
+- **Formularios con arrays manipulados** (`titulo[]=x`): al fallar la
+  validación, `bootstrap/app.php` guarda para `old()` solo lo que encaja con las
+  reglas (`App\Support\EntradaAntigua`): nunca arrays en campos de texto ni
+  contraseñas. Vale para todos los formularios web (también login y registro)
+  sin tocar las vistas. Tests en `EntradaManipuladaTest`.
+- **Zona horaria `Europe/Madrid`** (`APP_TIMEZONE` en `.env`; por defecto en
+  `config/app.php`). Las fechas se guardan y se muestran en hora de Madrid.
 
 ## Fuera de alcance (no lo construyas aunque parezca fácil)
 - Nóminas, turnos, cualquier otro proceso de RR. HH.

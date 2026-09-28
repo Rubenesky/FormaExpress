@@ -1,0 +1,29 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Guarda si cada intento aprobó con la nota mínima vigente en ese momento,
+     * para que un cambio posterior de nota_minima no altere intentos pasados.
+     */
+    public function up(): void
+    {
+        Schema::table('resultados_evaluacion', function (Blueprint $table) {
+            $table->boolean('aprobado')->after('nota');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('resultados_evaluacion', function (Blueprint $table) {
+            $table->dropColumn('aprobado');
+        });
+    }
+};

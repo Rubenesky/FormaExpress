@@ -30,6 +30,9 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            // Igual que el valor por defecto de la columna, pero explícito:
+            // así el modelo en memoria ya trae el rol (lo miran los Gates).
+            'rol' => 'empleado',
         ];
     }
 

@@ -28,6 +28,8 @@
                             <td class="text-center">{{ $curso->lecciones_count }}</td>
                             <td class="text-end text-nowrap">
                                 <a href="{{ route('cursos.lecciones.index', $curso) }}" class="btn btn-sm btn-outline-secondary">Lecciones</a>
+                                <a href="{{ route('cursos.asignaciones.index', $curso) }}" class="btn btn-sm btn-outline-secondary">Asignaciones</a>
+                                <a href="{{ route('cursos.evaluacion.show', $curso) }}" class="btn btn-sm btn-outline-secondary">Evaluación</a>
                                 <a href="{{ route('cursos.edit', $curso) }}" class="btn btn-sm btn-outline-primary">Editar</a>
                                 <a href="{{ route('cursos.eliminar', $curso) }}" class="btn btn-sm btn-outline-danger">Eliminar</a>
                             </td>

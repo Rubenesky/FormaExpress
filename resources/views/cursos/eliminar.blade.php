@@ -17,6 +17,16 @@
                         @else
                             Este curso no tiene lecciones.
                         @endif
+                        @if ($curso->evaluacion)
+                            <strong>
+                                También se borrará su evaluación
+                                @if ($curso->evaluacion->preguntas_count === 1)
+                                    y su única pregunta.
+                                @else
+                                    y sus {{ $curso->evaluacion->preguntas_count }} preguntas.
+                                @endif
+                            </strong>
+                        @endif
                         Esta acción no se puede deshacer.
                     </div>
 

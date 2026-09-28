@@ -44,7 +44,7 @@ class CursoController extends Controller
      */
     public function confirmarEliminacion(Curso $curso)
     {
-        $curso->loadCount('lecciones');
+        $curso->loadCount('lecciones')->load(['evaluacion' => fn ($q) => $q->withCount('preguntas')]);
 
         return view('cursos.eliminar', compact('curso'));
     }
@@ -52,7 +52,8 @@ class CursoController extends Controller
     public function destroy(Curso $curso)
     {
         try {
-            // La BD borra en cascada sus lecciones.
+            // La BD borra en cascada sus lecciones y su evaluación (con preguntas y opciones).
+            // Si hay asignaciones, certificados, progreso o resultados, una FK RESTRICT lo impide.
             $curso->delete();
         } catch (QueryException $e) {
             // 23000: una FK con RESTRICT lo impide (historial de empleados asociado).

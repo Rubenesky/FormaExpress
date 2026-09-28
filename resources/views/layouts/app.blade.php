@@ -29,6 +29,11 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav me-auto">
+                        @can('estudiar')
+                            <li class="nav-item">
+                                <a class="nav-link @if (request()->routeIs('mis-cursos.*', 'mis-lecciones.*')) active @endif" href="{{ route('mis-cursos.index') }}">Mis cursos</a>
+                            </li>
+                        @endcan
                         @can('administrar')
                             <li class="nav-item">
                                 <a class="nav-link @if (request()->routeIs('cursos.*')) active @endif" href="{{ route('cursos.index') }}">Cursos</a>
