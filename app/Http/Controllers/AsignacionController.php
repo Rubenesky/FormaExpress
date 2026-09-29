@@ -18,7 +18,10 @@ class AsignacionController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'email']);
 
-        return view('asignaciones.index', compact('curso', 'asignados', 'disponibles'));
+        // Certificados del curso, por empleado, para la columna "Certificado".
+        $certificados = $curso->certificados()->get()->keyBy('empleado_id');
+
+        return view('asignaciones.index', compact('curso', 'asignados', 'disponibles', 'certificados'));
     }
 
     public function store(AsignacionRequest $request, Curso $curso)

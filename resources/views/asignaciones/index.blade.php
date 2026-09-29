@@ -56,6 +56,7 @@
                         <th>Empleado</th>
                         <th>Correo electrónico</th>
                         <th>Asignado el</th>
+                        <th>Certificado</th>
                         <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
@@ -65,6 +66,14 @@
                             <td>{{ $empleado->name }}</td>
                             <td>{{ $empleado->email }}</td>
                             <td>{{ \Illuminate\Support\Carbon::parse($empleado->pivot->fecha_asignacion)->format('d/m/Y') }}</td>
+                            <td>
+                                @if ($certificado = $certificados->get($empleado->id))
+                                    {{ $certificado->fecha_emision->format('d/m/Y') }}
+                                    · <a href="{{ route('certificados.pdf', $certificado) }}">PDF</a>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
                             <td class="text-end">
                                 <a href="{{ route('cursos.asignaciones.eliminar', [$curso, $empleado]) }}" class="btn btn-sm btn-outline-danger">Desasignar</a>
                             </td>

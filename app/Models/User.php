@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +30,16 @@ class User extends Authenticatable
         return $this->belongsToMany(Curso::class, 'asignaciones_curso', 'empleado_id', 'curso_id')
             ->withPivot('fecha_asignacion')
             ->withTimestamps();
+    }
+
+    public function certificados(): HasMany
+    {
+        return $this->hasMany(Certificado::class, 'empleado_id');
+    }
+
+    public function insignias(): HasMany
+    {
+        return $this->hasMany(Insignia::class, 'empleado_id');
     }
 
     public function tieneAsignado(Curso $curso): bool

@@ -10,6 +10,13 @@
     </nav>
 
     <h1 class="h3">{{ $curso->titulo }}</h1>
+
+    @if ($certificado)
+        <div class="alert alert-success d-flex flex-wrap justify-content-between align-items-center gap-2" role="alert">
+            <span>Curso certificado el {{ $certificado->fecha_emision->format('d/m/Y') }}.</span>
+            <a href="{{ route('certificados.pdf', $certificado) }}" class="btn btn-sm btn-success">Descargar certificado</a>
+        </div>
+    @endif
     @if ($curso->descripcion)
         <p class="text-muted" style="white-space: pre-line">{{ $curso->descripcion }}</p>
     @endif

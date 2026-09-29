@@ -12,7 +12,12 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card h-100">
                         <div class="card-body d-flex flex-column">
-                            <h2 class="h5 card-title">{{ $curso->titulo }}</h2>
+                            <h2 class="h5 card-title">
+                                {{ $curso->titulo }}
+                                @if ($certificados->contains($curso->id))
+                                    <span class="badge text-bg-success">Certificado</span>
+                                @endif
+                            </h2>
                             @if ($curso->descripcion)
                                 <p class="card-text text-muted">{{ Str::limit($curso->descripcion, 120) }}</p>
                             @endif

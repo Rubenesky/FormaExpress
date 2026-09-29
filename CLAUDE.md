@@ -82,8 +82,28 @@ como catálogo + relación, usuario MySQL propio para la app en vez de root.
 ## Estado por módulos (Tarea 3)
 - **Módulo 1 — cursos y lecciones: hecho.**
 - **Módulo 2 — asignación, progreso y evaluaciones: hecho.**
-- Módulo 3 — certificados e insignias: pendiente. En el módulo 2 no se emite
-  nada: solo queda registrado cada resultado.
+- **Módulo 3 — certificados e insignias: hecho** (sin rol encargado, ver abajo).
+
+### Certificados e insignias (módulo 3, decisiones del usuario)
+- Certificado **automático con el primer aprobado** de la evaluación del curso
+  (`App\Support\Logros`, en la misma transacción que guarda el intento).
+  **Un curso sin evaluación no certifica.** fecha_emision = día del primer
+  aprobado; un aprobado posterior no duplica ni cambia la fecha (único por
+  empleado + curso).
+- PDF con DomPDF (`barryvdh/laravel-dompdf`), A4 apaisado, fuente DejaVu Sans
+  con subsetting (~17 KB). Código visible `FX-000001` (id con ceros).
+  Descarga: el propio empleado o un administrador (Gate `ver-certificado`).
+- Insignias automáticas, catálogo fijo en `Insignia::CATALOGO`:
+  `primer-certificado`, `cinco-certificados`, `nota-maxima` (un 10) y
+  `primer-intento` (aprobar sin suspensos previos en esa evaluación).
+  Migración `2026_09_29_000001`: unique(insignias.empleado_id, hito).
+  El catálogo como tabla propia sigue pendiente para la Tarea 2.
+- Pantallas: "Mis logros" (empleado: certificados con PDF e insignias
+  conseguidas/pendientes), aviso de logros nuevos tras cada intento, certificado
+  en el detalle del curso y columna "Certificado" en las asignaciones (admin).
+- **Fuera de este módulo, por decisión del usuario**: la pantalla del rol
+  encargado y el registro RGPD de consultas (tabla nueva): van juntos después
+  de la Tarea 2.
 
 ### Autorización (Gates en `AppServiceProvider`, aplicados con `can:` en rutas)
 - `administrar`: rol administrador (cursos, lecciones, asignaciones, evaluación).
@@ -92,6 +112,7 @@ como catálogo + relación, usuario MySQL propio para la app en vez de root.
 - `hacer-evaluacion`: empleado con el curso asignado, curso con **al menos una
   lección** (decisión del usuario), evaluación con al menos una pregunta y
   **todas las lecciones completadas**.
+- `ver-certificado`: el empleado dueño del certificado o un administrador.
 - El rol encargado aún no tiene pantallas (403 en todo).
 
 ### Reglas de negocio de las evaluaciones (fijadas por el usuario)

@@ -25,6 +25,11 @@ class Curso extends Model
         return $this->hasOne(Evaluacion::class);
     }
 
+    public function certificados(): HasMany
+    {
+        return $this->hasMany(Certificado::class);
+    }
+
     /**
      * Empleados que tienen el curso asignado (tabla asignaciones_curso).
      */

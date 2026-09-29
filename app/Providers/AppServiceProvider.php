@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Certificado;
 use App\Models\Curso;
 use App\Models\Leccion;
 use App\Models\User;
@@ -40,6 +41,10 @@ class AppServiceProvider extends ServiceProvider
             && $curso->lecciones()->exists()
             && $curso->evaluacion()->whereHas('preguntas')->exists()
             && $user->leccionesPendientesEn($curso) === 0);
+
+        // Certificado en PDF: su propio empleado o un administrador (el encargado, más adelante).
+        Gate::define('ver-certificado', fn (User $user, Certificado $certificado) => $user->rol === 'administrador'
+            || ($user->rol === 'empleado' && (int) $certificado->empleado_id === (int) $user->id));
 
         Paginator::useBootstrapFive();
     }

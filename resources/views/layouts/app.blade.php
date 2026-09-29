@@ -33,6 +33,9 @@
                             <li class="nav-item">
                                 <a class="nav-link @if (request()->routeIs('mis-cursos.*', 'mis-lecciones.*')) active @endif" href="{{ route('mis-cursos.index') }}">Mis cursos</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link @if (request()->routeIs('mis-logros.*')) active @endif" href="{{ route('mis-logros.index') }}">Mis logros</a>
+                            </li>
                         @endcan
                         @can('administrar')
                             <li class="nav-item">

@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Curso;
+use App\Models\Insignia;
+use App\Support\Logros;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * El empleado hace la evaluación de un curso y ve su resultado.
@@ -37,15 +40,22 @@ class HacerEvaluacionController extends Controller
 
         $correccion = $evaluacion->corregir($validados['respuestas']);
 
-        $evaluacion->resultados()->create([
-            'empleado_id' => $request->user()->id,
-            'nota' => $correccion['nota'],
-            'aprobado' => $evaluacion->aprueba($correccion['nota']),
-        ]);
+        // El intento y lo que consigue con él (certificado, insignias) se guardan juntos.
+        $logros = DB::transaction(function () use ($evaluacion, $correccion, $request) {
+            $resultado = $evaluacion->resultados()->create([
+                'empleado_id' => $request->user()->id,
+                'nota' => $correccion['nota'],
+                'aprobado' => $evaluacion->aprueba($correccion['nota']),
+            ]);
+
+            return Logros::registrar($resultado);
+        });
 
         return redirect()->route('mis-cursos.evaluacion.resultado', $curso)
             ->with('falladas', $correccion['falladas'])
-            ->with('aciertos', $correccion['aciertos']);
+            ->with('aciertos', $correccion['aciertos'])
+            ->with('certificado_nuevo', $logros['certificado']?->id)
+            ->with('insignias_nuevas', $logros['insignias']);
     }
 
     public function resultado(Request $request, Curso $curso)
@@ -71,6 +81,13 @@ class HacerEvaluacionController extends Controller
             'aciertos' => session('aciertos'),
             'falladas' => $falladas,
             'totalPreguntas' => $evaluacion->preguntas()->count(),
+            // Lo conseguido en el intento recién enviado (solo justo después).
+            'certificadoNuevo' => session('certificado_nuevo')
+                ? $request->user()->certificados()->find(session('certificado_nuevo'))
+                : null,
+            'insigniasNuevas' => collect(session('insignias_nuevas', []))
+                ->filter(fn ($hito) => isset(Insignia::CATALOGO[$hito]))
+                ->map(fn ($hito) => Insignia::CATALOGO[$hito]['nombre']),
         ]);
     }
 }

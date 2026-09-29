@@ -19,7 +19,9 @@ class MisCursosController extends Controller
             ->orderBy('titulo')
             ->get();
 
-        return view('mis-cursos.index', compact('cursos'));
+        $certificados = $request->user()->certificados()->pluck('curso_id');
+
+        return view('mis-cursos.index', compact('cursos', 'certificados'));
     }
 
     public function show(Request $request, Curso $curso)
@@ -36,7 +38,9 @@ class MisCursosController extends Controller
             ? $evaluacion->resultados()->where('empleado_id', $empleado->id)->orderByDesc('id')->get()
             : collect();
 
-        return view('mis-cursos.show', compact('curso', 'lecciones', 'completadas', 'evaluacion', 'intentos'));
+        $certificado = $empleado->certificados()->where('curso_id', $curso->id)->first();
+
+        return view('mis-cursos.show', compact('curso', 'lecciones', 'completadas', 'evaluacion', 'intentos', 'certificado'));
     }
 
     public function leccion(Request $request, Leccion $leccion)

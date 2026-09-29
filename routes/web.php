@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\AsignacionController;
+use App\Http\Controllers\CertificadoController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\EvaluacionController;
 use App\Http\Controllers\HacerEvaluacionController;
 use App\Http\Controllers\LeccionController;
 use App\Http\Controllers\MisCursosController;
+use App\Http\Controllers\MisLogrosController;
 use App\Http\Controllers\PreguntaController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +35,12 @@ Route::middleware('auth')->group(function () {
         ->middleware('can:hacer-evaluacion,curso')->name('mis-cursos.evaluacion.enviar');
     Route::get('mis-cursos/{curso}/evaluacion/resultado', [HacerEvaluacionController::class, 'resultado'])
         ->middleware('can:ver-curso,curso')->name('mis-cursos.evaluacion.resultado');
+
+    // Certificados e insignias.
+    Route::get('mis-logros', [MisLogrosController::class, 'index'])
+        ->middleware('can:estudiar')->name('mis-logros.index');
+    Route::get('certificados/{certificado}/pdf', [CertificadoController::class, 'pdf'])
+        ->middleware('can:ver-certificado,certificado')->name('certificados.pdf');
 });
 
 // Gestión de cursos y lecciones: solo administradores (Gate "administrar").
