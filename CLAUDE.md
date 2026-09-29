@@ -185,6 +185,15 @@ así que el backend no se toca de lenguaje bajo ningún concepto.
 - Tests: `artisan test` usa SQLite en memoria (pdo_sqlite activado en el php.ini
   de PHP 8.3).
 
+## Cómo proponer siguientes pasos
+Cuando termines un módulo y quieras proponer el siguiente paso, hazlo como
+pregunta explícita ('¿Empiezo el módulo X, sí o no?'), nunca como anuncio de lo
+que vas a hacer a continuación. Un 'sigue' o 'sí' mío después de eso responde a
+la pregunta inmediatamente anterior que te haya hecho, no autoriza un módulo
+entero ni ninguna decisión de diseño no formulada explícitamente. Si tienes
+dudas de qué estoy confirmando, pregunta qué estoy confirmando antes de
+escribir código.
+
 ## Metodología
 Incremental por módulos, en este orden: (1) cursos y lecciones, (2) progreso y
 evaluaciones, (3) certificados e insignias. Cada módulo se prueba antes de pasar

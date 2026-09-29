@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CursoRequest;
 use App\Models\Curso;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 
 class CursoController extends Controller
 {
@@ -46,7 +47,19 @@ class CursoController extends Controller
     {
         $curso->loadCount('lecciones')->load(['evaluacion' => fn ($q) => $q->withCount('preguntas')]);
 
-        return view('cursos.eliminar', compact('curso'));
+        // Datos de empleados que bloquean el borrado (FK RESTRICT), para avisar antes
+        // de pulsar, igual que la confirmación de borrar una evaluación.
+        $bloqueos = [
+            'asignaciones' => $curso->empleadosAsignados()->count(),
+            'progreso' => DB::table('progreso_lecciones')
+                ->join('lecciones', 'lecciones.id', '=', 'progreso_lecciones.leccion_id')
+                ->where('lecciones.curso_id', $curso->id)
+                ->count(),
+            'resultados' => $curso->evaluacion ? $curso->evaluacion->resultados()->count() : 0,
+            'certificados' => $curso->certificados()->count(),
+        ];
+
+        return view('cursos.eliminar', compact('curso', 'bloqueos'));
     }
 
     public function destroy(Curso $curso)

@@ -152,6 +152,69 @@ class CursoTest extends TestCase
             ->assertSee('Se borrará también su única lección.');
     }
 
+    public function test_la_confirmacion_con_evaluacion_sin_preguntas(): void
+    {
+        $curso = Curso::create(['titulo' => 'Con evaluación vacía']);
+        $curso->evaluacion()->create(['titulo' => 'Test', 'nota_minima' => 8]);
+
+        $this->actingAs($this->admin())->get("/cursos/{$curso->id}/eliminar")
+            ->assertOk()
+            ->assertSeeText('También se borrará su evaluación (sin preguntas).')
+            ->assertDontSee('0 preguntas');
+    }
+
+    public function test_la_confirmacion_ofrece_el_borrado_si_no_hay_datos_de_empleados(): void
+    {
+        $curso = Curso::create(['titulo' => 'Sin datos']);
+        $curso->lecciones()->create(['titulo' => 'L1', 'contenido' => 'x', 'orden' => 1]);
+
+        $this->actingAs($this->admin())->get("/cursos/{$curso->id}/eliminar")
+            ->assertOk()
+            ->assertDontSee('No se puede eliminar')
+            ->assertSee('Sí, eliminar el curso');
+    }
+
+    public function test_la_confirmacion_avisa_antes_si_hay_datos_de_empleados(): void
+    {
+        $admin = $this->admin();
+        $empleado = $this->empleado();
+
+        // Cada caso crea un curso con un solo tipo de dato bloqueante.
+        $casos = [
+            '1 empleado asignado' => function (Curso $curso) use ($empleado) {
+                $curso->empleadosAsignados()->attach($empleado->id, ['fecha_asignacion' => today()->toDateString()]);
+            },
+            '1 lección completada por empleados' => function (Curso $curso) use ($empleado) {
+                $leccion = $curso->lecciones()->create(['titulo' => 'L1', 'contenido' => 'x', 'orden' => 1]);
+                $empleado->completarLeccion($leccion);
+            },
+            '1 intento de evaluación' => function (Curso $curso) use ($empleado) {
+                $evaluacion = $curso->evaluacion()->create(['titulo' => 'Test', 'nota_minima' => 8]);
+                $evaluacion->resultados()->create(['empleado_id' => $empleado->id, 'nota' => 5, 'aprobado' => false]);
+            },
+            '1 certificado emitido' => function (Curso $curso) use ($empleado) {
+                DB::table('certificados')->insert([
+                    'empleado_id' => $empleado->id,
+                    'curso_id' => $curso->id,
+                    'fecha_emision' => today()->toDateString(),
+                ]);
+            },
+        ];
+
+        foreach ($casos as $texto => $crearDato) {
+            $curso = Curso::create(['titulo' => "Curso con {$texto}"]);
+            $crearDato($curso);
+
+            $this->actingAs($admin)->get("/cursos/{$curso->id}/eliminar")
+                ->assertOk()
+                ->assertSee('No se puede eliminar: el curso tiene datos de empleados asociados.')
+                ->assertSee($texto)
+                ->assertSee('Volver')
+                ->assertDontSee('Sí, eliminar el curso')
+                ->assertDontSee('action="'.route('cursos.destroy', $curso).'"', false);
+        }
+    }
+
     public function test_el_administrador_elimina_un_curso_y_sus_lecciones_en_cascada(): void
     {
         $curso = Curso::create(['titulo' => 'A borrar']);
