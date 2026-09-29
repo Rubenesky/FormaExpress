@@ -42,7 +42,10 @@ class AppServiceProvider extends ServiceProvider
             && $curso->evaluacion()->whereHas('preguntas')->exists()
             && $user->leccionesPendientesEn($curso) === 0);
 
-        // Certificado en PDF: su propio empleado o un administrador (el encargado, más adelante).
+        // Consulta de solo lectura de la formación de los empleados (búsqueda y ficha).
+        Gate::define('consultar', fn (User $user) => in_array($user->rol, ['encargado', 'administrador'], true));
+
+        // Certificado en PDF: su propio empleado o un administrador (el encargado no descarga).
         Gate::define('ver-certificado', fn (User $user, Certificado $certificado) => $user->rol === 'administrador'
             || ($user->rol === 'empleado' && (int) $certificado->empleado_id === (int) $user->id));
 

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AsignacionController;
 use App\Http\Controllers\CertificadoController;
+use App\Http\Controllers\ConsultaController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\EvaluacionController;
 use App\Http\Controllers\HacerEvaluacionController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\LeccionController;
 use App\Http\Controllers\MisCursosController;
 use App\Http\Controllers\MisLogrosController;
 use App\Http\Controllers\PreguntaController;
+use App\Http\Controllers\RegistroConsultaController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/home');
@@ -43,8 +45,17 @@ Route::middleware('auth')->group(function () {
         ->middleware('can:ver-certificado,certificado')->name('certificados.pdf');
 });
 
+// Consulta de solo lectura (encargado y administrador, Gate "consultar"). Solo GET.
+Route::middleware(['auth', 'can:consultar'])->group(function () {
+    Route::get('consulta', [ConsultaController::class, 'index'])->name('consulta.index');
+    Route::get('consulta/empleados/{empleado}', [ConsultaController::class, 'ficha'])->name('consulta.ficha');
+});
+
 // Gestión de cursos y lecciones: solo administradores (Gate "administrar").
 Route::middleware(['auth', 'can:administrar'])->group(function () {
+    // Registro RGPD de consultas: solo lectura (sin rutas de edición ni borrado).
+    Route::get('registro-consultas', [RegistroConsultaController::class, 'index'])->name('registro-consultas.index');
+
     Route::get('cursos/{curso}/eliminar', [CursoController::class, 'confirmarEliminacion'])
         ->name('cursos.eliminar');
     Route::resource('cursos', CursoController::class)->except('show');

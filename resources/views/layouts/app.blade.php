@@ -37,9 +37,17 @@
                                 <a class="nav-link @if (request()->routeIs('mis-logros.*')) active @endif" href="{{ route('mis-logros.index') }}">Mis logros</a>
                             </li>
                         @endcan
+                        @can('consultar')
+                            <li class="nav-item">
+                                <a class="nav-link @if (request()->routeIs('consulta.*')) active @endif" href="{{ route('consulta.index') }}">Consulta</a>
+                            </li>
+                        @endcan
                         @can('administrar')
                             <li class="nav-item">
                                 <a class="nav-link @if (request()->routeIs('cursos.*')) active @endif" href="{{ route('cursos.index') }}">Cursos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @if (request()->routeIs('registro-consultas.*')) active @endif" href="{{ route('registro-consultas.index') }}">Registro de consultas</a>
                             </li>
                         @endcan
                     </ul>

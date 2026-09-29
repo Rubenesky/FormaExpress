@@ -34,8 +34,9 @@ cambio de personal.
 - Tests: PHPUnit.
 - Entorno local: Laragon. Control de versiones: Git/GitHub.
 
-## Modelo de datos (11 tablas de dominio, ninguna aislada)
-Ampliado de 8 a 11 al escribir las migraciones; se formaliza en la Tarea 2.
+## Modelo de datos (12 tablas de dominio, ninguna aislada)
+Ampliado de 8 a 11 al escribir las migraciones y a 12 con el registro RGPD
+(`registro_consultas`); se formaliza en la Tarea 2.
 - empleados — **es la tabla de usuarios** (login). Columnas de auth en inglés
   (name, email, password) porque Laravel las espera; `rol` ENUM
   administrador/empleado/encargado. El modelo es `App\Models\User` con
@@ -60,6 +61,10 @@ resultados_evaluacion.aprobado (boolean: se guarda con la nota mínima vigente
 en ese intento, así que cambiar nota_minima no altera intentos pasados).
 - certificados (FK empleado + curso, fecha_emision; único por par)
 - insignias (FK empleado, hito conseguido)
+- registro_consultas (RGPD: consultor_id y consultado_id, ambas FK a
+  empleados con **RESTRICT**, y consultado_en). Migración `2026_09_29_000002`,
+  aprobada por el usuario. Solo se inserta: sin updated_at ni rutas de
+  edición/borrado.
 
 Borrados: cascada dentro de la estructura del curso (lecciones, evaluaciones,
 preguntas, opciones); el historial del empleado bloquea borrados (FK RESTRICT:
@@ -67,8 +72,10 @@ el controlador captura el error 23000 y muestra un mensaje, nunca un 500).
 Excepción: **ninguna FK impide desasignar un curso con progreso**; se comprueba
 en la app (`Curso::tieneProgresoDe()`), decisión del usuario.
 
-Pendiente para la Tarea 2: tabla de registro de consultas (RGPD), insignias
-como catálogo + relación, usuario MySQL propio para la app en vez de root.
+**Pendiente de la Tarea 2 real (no tocar todavía):**
+- **Usuarios y privilegios de MySQL** (usuario propio para la app en vez de root).
+- **Datos de prueba** (script de carga, 5-10 registros por tabla).
+- Insignias como catálogo + relación (ver módulo 3).
 
 ## Funcionalidad
 - CRUD de cursos y lecciones (administrador).
@@ -82,7 +89,21 @@ como catálogo + relación, usuario MySQL propio para la app en vez de root.
 ## Estado por módulos (Tarea 3)
 - **Módulo 1 — cursos y lecciones: hecho.**
 - **Módulo 2 — asignación, progreso y evaluaciones: hecho.**
-- **Módulo 3 — certificados e insignias: hecho** (sin rol encargado, ver abajo).
+- **Módulo 3 — certificados e insignias: hecho.**
+- **Módulo de consulta (encargado) con registro RGPD: hecho** (independiente de
+  la Tarea 2, por petición del usuario).
+
+### Consulta del encargado y registro RGPD
+- Gate `consultar` (encargado o administrador). Rutas solo GET:
+  `/consulta` (búsqueda por nombre, mínimo 2 caracteres; lista solo nombre y
+  correo de usuarios con rol empleado) y `/consulta/empleados/{empleado}`
+  (ficha: cursos asignados con % de progreso, certificado con fecha **sin PDF**,
+  insignias). La ficha de un no-empleado da 404. Nada editable.
+- Cada apertura de una ficha inserta una fila en `registro_consultas`
+  (quién, a quién, cuándo); la búsqueda no se registra porque no muestra datos
+  de formación.
+- `/registro-consultas`: pantalla solo para el administrador (Gate
+  `administrar`), paginada de 25 en 25, más reciente primero. Solo lectura.
 
 ### Certificados e insignias (módulo 3, decisiones del usuario)
 - Certificado **automático con el primer aprobado** de la evaluación del curso
@@ -101,9 +122,8 @@ como catálogo + relación, usuario MySQL propio para la app en vez de root.
 - Pantallas: "Mis logros" (empleado: certificados con PDF e insignias
   conseguidas/pendientes), aviso de logros nuevos tras cada intento, certificado
   en el detalle del curso y columna "Certificado" en las asignaciones (admin).
-- **Fuera de este módulo, por decisión del usuario**: la pantalla del rol
-  encargado y el registro RGPD de consultas (tabla nueva): van juntos después
-  de la Tarea 2.
+- La pantalla del rol encargado y el registro RGPD quedaron fuera de este
+  módulo y se hicieron después en su propio módulo (ver abajo).
 
 ### Autorización (Gates en `AppServiceProvider`, aplicados con `can:` en rutas)
 - `administrar`: rol administrador (cursos, lecciones, asignaciones, evaluación).
@@ -113,7 +133,8 @@ como catálogo + relación, usuario MySQL propio para la app en vez de root.
   lección** (decisión del usuario), evaluación con al menos una pregunta y
   **todas las lecciones completadas**.
 - `ver-certificado`: el empleado dueño del certificado o un administrador.
-- El rol encargado aún no tiene pantallas (403 en todo).
+- `consultar`: encargado o administrador (búsqueda y fichas de solo lectura).
+  El encargado no tiene ningún otro permiso: todo lo demás le da 403.
 
 ### Reglas de negocio de las evaluaciones (fijadas por el usuario)
 - Una evaluación por curso.
