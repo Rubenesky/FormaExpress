@@ -205,6 +205,30 @@ así que el backend no se toca de lenguaje bajo ningún concepto.
   admin1234 (el registro público solo crea empleados).
 - Tests: `artisan test` usa SQLite en memoria (pdo_sqlite activado en el php.ini
   de PHP 8.3).
+- Usuarios de demostración (opcional, no lo llama DatabaseSeeder):
+  `php artisan db:seed --class=UsuariosDemostracionSeeder` crea
+  empleado@formaexpress.test / empleado1234 y encargado@formaexpress.test /
+  encargado1234. NO es el dataset de la Tarea 2. Ya están cargados en la BD local.
+
+## Documentación (Tarea 3)
+- `docs/instalacion.md`: guía de instalación en local, verificada de principio a
+  fin en un clon limpio (BD aparte, PHP 8.3, sin los archivos de este equipo).
+- `docs/manual-usuario.md`: manual por perfil con la tabla de usuarios de prueba.
+
+**Pendiente de verdad:**
+- **URL de hosting / despliegue online:** no existe. Ambos documentos lo marcan
+  como pendiente; cuando haya URL, añadirla en los dos.
+- **Repositorio sin remoto:** no hay `origin` en GitHub. La guía usa
+  `git clone <URL-del-repositorio>`; sustituirla cuando se publique.
+- Hallazgos de la verificación en carpeta limpia (ya reflejados en la guía):
+  - Con un `php` < 8.3, `composer install` sugiere "Please run composer update";
+    es engañoso (la causa es la versión de PHP). La guía avisa de no ejecutarlo.
+  - `composer install` tardó más de 10 min en este equipo (antivirus); la guía
+    solo dice "unos minutos".
+  - Al parar `php artisan serve` en Windows puede quedar un proceso `php` hijo
+    que bloquea la carpeta; no afecta a la guía, solo a borrar el clon.
+- Usuario MySQL propio de la aplicación y datos de prueba: siguen en la Tarea 2
+  (la guía usa un usuario existente mientras tanto).
 
 ## Cómo proponer siguientes pasos
 Cuando termines un módulo y quieras proponer el siguiente paso, hazlo como

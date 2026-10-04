@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Database\Seeders\AdministradorSeeder;
+use Database\Seeders\UsuariosDemostracionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -55,6 +56,39 @@ class AutenticacionTest extends TestCase
             ->assertRedirect('/home');
 
         $this->assertAuthenticated();
+    }
+
+    public function test_el_seeder_de_demostracion_crea_un_empleado_y_un_encargado(): void
+    {
+        $this->seed(UsuariosDemostracionSeeder::class);
+        $this->seed(UsuariosDemostracionSeeder::class); // se puede repetir sin duplicar
+
+        $this->assertSame(2, User::count());
+        $this->assertSame('empleado', User::where('email', 'empleado@formaexpress.test')->value('rol'));
+        $this->assertSame('encargado', User::where('email', 'encargado@formaexpress.test')->value('rol'));
+    }
+
+    public function test_los_usuarios_de_demostracion_inician_sesion_con_su_perfil(): void
+    {
+        $this->seed(UsuariosDemostracionSeeder::class);
+
+        $perfiles = [
+            ['empleado@formaexpress.test', 'empleado1234', '/mis-cursos'],
+            ['encargado@formaexpress.test', 'encargado1234', '/consulta'],
+        ];
+
+        foreach ($perfiles as [$email, $password, $enlace]) {
+            $this->post('/login', ['email' => $email, 'password' => $password])->assertRedirect('/home');
+            $this->get('/home')->assertSee('href="'.url($enlace).'"', false);
+            $this->post('/logout');
+        }
+    }
+
+    public function test_db_seed_por_defecto_no_crea_los_usuarios_de_demostracion(): void
+    {
+        $this->seed();
+
+        $this->assertSame(['admin@formaexpress.test'], User::pluck('email')->all());
     }
 
     public function test_el_registro_crea_empleados_aunque_se_envie_otro_rol(): void
