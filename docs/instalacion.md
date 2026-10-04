@@ -51,12 +51,9 @@ git --version
 ## 2. Descargar el proyecto
 
 ```bash
-git clone <URL-del-repositorio> formaexpress
+git clone https://github.com/Rubenesky/FormaExpress formaexpress
 cd formaexpress
 ```
-
-> `<URL-del-repositorio>` es la dirección del repositorio en GitHub. **Pendiente:**
-> el repositorio todavía no está publicado; sustitúyela cuando lo esté.
 
 Todas las órdenes siguientes se ejecutan **dentro de la carpeta `formaexpress`**.
 
@@ -242,6 +239,5 @@ necesitan además la extensión **`pdo_sqlite`** de PHP. Deben pasar todos.
 ## Pendiente
 
 - **Despliegue online:** no existe todavía ninguna URL pública de la aplicación.
-- **URL del repositorio** en GitHub (paso 2), cuando se publique.
 - **Usuario de MySQL propio para la aplicación** (Tarea 2).
 - **Datos de prueba** de la Tarea 2 (5-10 registros por tabla).

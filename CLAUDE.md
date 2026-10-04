@@ -214,12 +214,16 @@ así que el backend no se toca de lenguaje bajo ningún concepto.
 - `docs/instalacion.md`: guía de instalación en local, verificada de principio a
   fin en un clon limpio (BD aparte, PHP 8.3, sin los archivos de este equipo).
 - `docs/manual-usuario.md`: manual por perfil con la tabla de usuarios de prueba.
+- `docs/pruebas.md`: documentación de la batería de pruebas (137 tests, 634
+  aserciones; todo integración, sin unitarias reales; sin máscaras en el
+  proyecto). Si se añaden tests, actualizar sus cifras y tablas.
 
 **Pendiente de verdad:**
 - **URL de hosting / despliegue online:** no existe. Ambos documentos lo marcan
   como pendiente; cuando haya URL, añadirla en los dos.
-- **Repositorio sin remoto:** no hay `origin` en GitHub. La guía usa
-  `git clone <URL-del-repositorio>`; sustituirla cuando se publique.
+- ~~**Repositorio sin remoto**~~ — hecho: https://github.com/Rubenesky/FormaExpress
+  (privado por ahora; la guía ya usa esa URL en el `git clone`).
+- ~~**Documento de pruebas**~~ — hecho: `docs/pruebas.md`.
 - Hallazgos de la verificación en carpeta limpia (ya reflejados en la guía):
   - Con un `php` < 8.3, `composer install` sugiere "Please run composer update";
     es engañoso (la causa es la versión de PHP). La guía avisa de no ejecutarlo.
