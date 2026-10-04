@@ -234,7 +234,7 @@ así que el backend no se toca de lenguaje bajo ningún concepto.
 - Usuario MySQL propio de la aplicación y datos de prueba: siguen en la Tarea 2
   (la guía usa un usuario existente mientras tanto).
 
-## Cómo proponer siguientes pasos
+## Cómo proponer pasos y verificar el trabajo
 Cuando termines un módulo y quieras proponer el siguiente paso, hazlo como
 pregunta explícita ('¿Empiezo el módulo X, sí o no?'), nunca como anuncio de lo
 que vas a hacer a continuación. Un 'sigue' o 'sí' mío después de eso responde a
@@ -242,6 +242,18 @@ la pregunta inmediatamente anterior que te haya hecho, no autoriza un módulo
 entero ni ninguna decisión de diseño no formulada explícitamente. Si tienes
 dudas de qué estoy confirmando, pregunta qué estoy confirmando antes de
 escribir código.
+
+Antes de decir que algo está hecho, funciona, pasa, está subido o es de una
+manera concreta, ejecuta el comando que lo demuestra (los tests, `git status`,
+`git remote -v`, leer el archivo o el código) y mira su salida en esa misma
+sesión. Lo que venga de un resumen de una sesión anterior, de este CLAUDE.md o
+de tu memoria no cuenta como comprobado: si no lo has vuelto a mirar, di que
+no está verificado en vez de presentarlo como un hecho. En cada informe separa
+lo que has comprobado de lo que supones. Si algo no se puede comprobar sin
+cambiar código o configuración, dilo y pregunta antes de cambiar nada. Usa
+siempre las skills verification-before-completion y receiving-code-review del
+plugin superpowers, y no actives ninguna otra skill del marketplace sin que te
+lo pida explícitamente.
 
 ## Metodología
 Incremental por módulos, en este orden: (1) cursos y lecciones, (2) progreso y

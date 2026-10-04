@@ -103,4 +103,55 @@ class AutenticacionTest extends TestCase
 
         $this->assertSame('empleado', User::where('email', 'ana@formaexpress.test')->value('rol'));
     }
+
+    // --- Validación del registro público ---
+
+    /** Datos de alta válidos; cada test cambia solo el campo que prueba. */
+    private function datosRegistro(array $cambios = []): array
+    {
+        return $cambios + [
+            'name' => 'Ana',
+            'email' => 'ana@formaexpress.test',
+            'password' => 'secreto123',
+            'password_confirmation' => 'secreto123',
+        ];
+    }
+
+    public function test_el_registro_rechaza_un_email_con_formato_invalido(): void
+    {
+        $this->from('/register')
+            ->post('/register', $this->datosRegistro(['email' => 'esto-no-es-un-correo']))
+            ->assertRedirect('/register')
+            ->assertSessionHasErrors(['email' => 'El campo correo electrónico debe ser un correo electrónico válido.'])
+            ->assertSessionDoesntHaveErrors(['name', 'password']);
+
+        $this->assertGuest();
+        $this->assertDatabaseCount('empleados', 0);
+    }
+
+    public function test_el_registro_exige_una_contrasena_de_al_menos_8_caracteres(): void
+    {
+        $this->from('/register')
+            ->post('/register', $this->datosRegistro(['password' => '1234567', 'password_confirmation' => '1234567']))
+            ->assertRedirect('/register')
+            ->assertSessionHasErrors(['password' => 'El campo contraseña debe tener al menos 8 caracteres.'])
+            ->assertSessionDoesntHaveErrors(['name', 'email']);
+
+        $this->assertGuest();
+        $this->assertDatabaseCount('empleados', 0);
+    }
+
+    public function test_el_registro_rechaza_un_email_ya_registrado(): void
+    {
+        User::factory()->create(['email' => 'ana@formaexpress.test']);
+
+        $this->from('/register')
+            ->post('/register', $this->datosRegistro())
+            ->assertRedirect('/register')
+            ->assertSessionHasErrors(['email' => 'Ya existe un registro con ese correo electrónico.'])
+            ->assertSessionDoesntHaveErrors(['name', 'password']);
+
+        $this->assertGuest();
+        $this->assertSame(1, User::where('email', 'ana@formaexpress.test')->count());
+    }
 }

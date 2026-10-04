@@ -81,8 +81,8 @@ número de lecciones. Cada fila tiene estos botones: *Lecciones*, *Asignaciones*
 Botón *Lecciones* de un curso. Lista las lecciones por su número de orden, con
 su fecha de última modificación.
 
-- **Crear:** *Nueva lección*. Título, número de orden (se propone el siguiente
-  libre) y contenido. Los saltos de línea del contenido se respetan.
+- **Crear:** *Nueva lección*. Título, número de orden (se propone el siguiente al
+  más alto que ya exista) y contenido. Los saltos de línea del contenido se respetan.
 - **Editar** y **Eliminar**, con confirmación. Una lección que algún empleado ya
   ha completado **no se puede eliminar**.
 

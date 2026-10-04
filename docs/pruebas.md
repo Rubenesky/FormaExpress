@@ -12,7 +12,7 @@ Resultado de ejecutar la batería completa el 4 de octubre de 2026:
 
 | Tests | Aserciones | Fallos | Errores | Omitidos |
 |---|---|---|---|---|
-| **137** | **634** | 0 | 0 | 0 |
+| **140** | **658** | 0 | 0 | 0 |
 
 | Módulo | Archivos | Tests | Aserciones |
 |---|---|---|---|
@@ -21,8 +21,8 @@ Resultado de ejecutar la batería completa el 4 de octubre de 2026:
 | Evaluaciones | `EvaluacionAdminTest`, `HacerEvaluacionTest` | 34 | 182 |
 | Certificados e insignias | `CertificadoTest`, `InsigniaTest` | 19 | 56 |
 | Consulta del encargado y registro RGPD | `ConsultaTest` | 15 | 90 |
-| Transversales (acceso, idioma, formularios manipulados) | `AutenticacionTest`, `EntradaManipuladaTest`, `Feature/ExampleTest`, `Unit/ExampleTest` | 18 | 86 |
-| **Total** | 13 archivos | **137** | **634** |
+| Transversales (acceso, registro, idioma, formularios manipulados) | `AutenticacionTest`, `EntradaManipuladaTest`, `Feature/ExampleTest`, `Unit/ExampleTest` | 21 | 110 |
+| **Total** | 13 archivos | **140** | **658** |
 
 Una *aserción* es cada comprobación individual dentro de un test (por ejemplo,
 "la respuesta es 200" o "la tabla tiene 1 fila"). Un test pasa solo si pasan
@@ -37,12 +37,17 @@ No hay pruebas unitarias reales.**
 
 - La carpeta `tests/Unit` solo contiene `ExampleTest::test_that_true_is_true`,
   el ejemplo que trae Laravel al instalarlo. Comprueba que `true` es `true`: no
-  prueba nada del proyecto. Se cuenta en el total de 137 pero no aporta
+  prueba nada del proyecto. Se cuenta en el total de 140 pero no aporta
   cobertura.
-- Los otros 136 tests están en `tests/Feature`. Cada uno arranca la aplicación
-  Laravel completa, crea los datos que necesita en una base de datos, simula
+- Los otros 139 tests están en `tests/Feature`. Cada uno arranca la aplicación
+  Laravel completa, crea en una base de datos los datos que necesita (salvo los
+  3 de `Feature/ExampleTest`, que no crean ninguno), simula
   peticiones HTTP (como si fuera el navegador: `GET /cursos`, `POST /cursos`…)
-  con un usuario de un rol concreto y comprueba:
+  y comprueba lo que se indica abajo. Casi todas las peticiones se hacen con la
+  sesión iniciada como un usuario de un rol concreto; se hacen sin sesión las de
+  los 3 de `Feature/ExampleTest`, las de login y registro, y las que comprueban
+  que un invitado es enviado al login (por ejemplo,
+  `test_un_invitado_es_enviado_al_login`). Lo que se comprueba:
   - la respuesta (código HTTP, redirección, texto que aparece o no en la página,
     errores de validación y su mensaje en español);
   - el estado de la base de datos después (filas creadas, borradas o sin
@@ -53,9 +58,11 @@ No hay pruebas unitarias reales.**
   que siguen siendo de integración.
 
 **Base de datos de las pruebas:** SQLite en memoria (configurado en
-`phpunit.xml`), no MySQL. Cada test empieza con la base de datos vacía y recién
-migrada (`RefreshDatabase`), así que los tests no dependen unos de otros ni
-tocan los datos de la instalación.
+`phpunit.xml`), no MySQL, así que los tests no tocan los datos de la
+instalación. Los 11 archivos que crean datos usan `RefreshDatabase`: cada uno de
+sus tests empieza con la base de datos vacía y recién migrada, y no depende de
+los demás. Los dos `ExampleTest` no lo usan y no crean ningún dato (solo
+piden `/`, `/home` y `/login`, o comprueban que `true` es `true`).
 
 **Qué no hay** (para no presentarlo como cubierto):
 
@@ -96,7 +103,7 @@ prepara sus propios datos.
 
 ### Qué significa el resultado
 
-- Al final aparece una línea como **`Tests: 137 passed (634 assertions)`** y el
+- Al final aparece una línea como **`Tests:    140 passed (658 assertions)`** y el
   comando termina con código de salida `0`: todo está bien.
 - Si algún test falla, aparece marcado como `FAIL` con el nombre del test, la
   aserción que no se cumplió (valor esperado frente a valor obtenido) y el
@@ -125,9 +132,10 @@ longitud, caracteres especiales y máscaras**. Esto es lo que hay, tal cual:
 | Nota mínima | vacío | Error "El campo nota mínima es obligatorio." | ídem |
 | Empleado a asignar | id de un encargado, de un administrador o inexistente (`99999`) | Error "El empleado seleccionado no es válido." y ninguna asignación | `AsignacionTest::test_solo_se_asigna_a_empleados` |
 | Empleado a asignar | vacío | Error "El campo empleado es obligatorio." | ídem |
-| Opción correcta de una pregunta | ninguna marcada / una vacía marcada | "Marca cuál es la opción correcta." / "La opción marcada como correcta está vacía." | `EvaluacionAdminTest::test_una_pregunta_necesita_exactamente_una_correcta` |
+| Opción correcta de una pregunta | ninguna marcada / una vacía marcada / dos marcadas (petición manipulada que envía un array) | "Marca cuál es la opción correcta." / "La opción marcada como correcta está vacía." / error en `correcta`; en los tres casos no se guarda nada | `EvaluacionAdminTest::test_una_pregunta_necesita_exactamente_una_correcta` |
 | Cualquier campo de texto de todos los formularios | un **array** en lugar de texto (petición manipulada, p. ej. `titulo[]=x`) | Se rechaza, vuelve al formulario con el error y la página carga (nunca un error 500); no se guarda nada | `EntradaManipuladaTest` (5 tests, 50 aserciones) |
 | Respuesta de la evaluación | la opción correcta de **otra** pregunta | Cuenta como fallo (nota 0) | `HacerEvaluacionTest::test_una_opcion_de_otra_pregunta_cuenta_como_fallo` |
+| Correo del registro | `esto-no-es-un-correo` | "El campo correo electrónico debe ser un correo electrónico válido.", sin errores en los demás campos; no se crea la cuenta ni se inicia sesión | `AutenticacionTest::test_el_registro_rechaza_un_email_con_formato_invalido` |
 
 ### Obligatoriedad
 
@@ -146,30 +154,41 @@ longitud, caracteres especiales y máscaras**. Esto es lo que hay, tal cual:
 | Campo | Entrada | Salida esperada | Test |
 |---|---|---|---|
 | Título del curso | 256 caracteres | "El campo título no puede tener más de 255 caracteres." | `CursoTest::test_el_titulo_no_puede_superar_255_caracteres` |
+| Contraseña del registro | 7 caracteres (`1234567`) | "El campo contraseña debe tener al menos 8 caracteres.", sin errores en los demás campos; no se crea la cuenta | `AutenticacionTest::test_el_registro_exige_una_contrasena_de_al_menos_8_caracteres` |
 
-**Solo hay un test de longitud máxima.** Los formularios tienen otros límites
-en las reglas de validación que **no** están cubiertos por ningún test:
-descripción del curso (5000), título de lección y de evaluación (255),
-enunciado de pregunta (2000), cada opción (255) y orden de lección (65535).
+**Hay un test de longitud máxima (título del curso) y uno de longitud mínima
+(contraseña del registro).** Los formularios tienen otros límites en las reglas
+de validación que **no** están cubiertos por ningún test: descripción del curso
+(5000), título de lección y de evaluación (255), enunciado de pregunta (2000),
+cada opción (255), orden de lección (65535) y nombre y correo del registro
+(255).
+
+### Valores duplicados
+
+| Campo | Entrada | Salida esperada | Test |
+|---|---|---|---|
+| Correo del registro | un correo que ya tiene otra cuenta | "Ya existe un registro con ese correo electrónico.", sin errores en los demás campos; sigue habiendo una sola cuenta con ese correo y no se inicia sesión | `AutenticacionTest::test_el_registro_rechaza_un_email_ya_registrado` |
+| Empleado a asignar | un empleado que ya tiene el curso | "Este empleado ya tiene el curso asignado." y sigue habiendo una sola asignación | `AsignacionTest::test_no_se_asigna_dos_veces_el_mismo_curso` |
 
 ### Caracteres especiales
 
 | Caso | Entrada | Salida esperada | Test |
 |---|---|---|---|
 | HTML/JavaScript en el contenido de una lección | `<script>alert(1)</script>` | Se muestra escapado (`&lt;script&gt;…`) y nunca como etiqueta real | `ProgresoTest::test_el_contenido_de_la_leccion_se_muestra_escapado` |
+| Comodines de SQL en la búsqueda del encargado | `%%` | No lista a nadie (no se interpreta como "cualquier texto") | `ConsultaTest::test_la_busqueda_solo_lista_empleados_y_exige_dos_caracteres` |
 | Tildes en los datos | opciones como `Otra más` | Se guardan y se recuperan iguales | `EvaluacionAdminTest::test_editar_una_pregunta_reemplaza_sus_opciones` |
 | Tildes y signos en la interfaz | `¿Has olvidado tu contraseña?`, `Contraseña` | Aparecen correctamente en la página | `AutenticacionTest::test_el_login_esta_en_espanol_y_usa_bootstrap_desde_cdn` |
 
-No hay tests específicos de otros caracteres (comillas, emojis, etc.); el
-escapado de toda la salida lo hace Blade con `{{ }}`, que es lo que comprueba
-el test del `<script>`.
+No hay tests de otros caracteres (comillas, emojis, etc.); el escapado de toda
+la salida lo hace Blade con `{{ }}`, que es lo que comprueba el test del
+`<script>`.
 
 ### Máscaras
 
 **El proyecto no tiene ningún campo con máscara** (no hay DNI, teléfono,
 código postal ni similar), así que **no hay pruebas de máscaras**. El único
 campo con formato es el correo electrónico del registro, que valida Laravel
-con su regla `email`; ese formato **no** tiene un test propio.
+con su regla `email`; su caso inválido está en la tabla de tipos de dato.
 
 ### Valores límite (cálculo de la nota)
 
@@ -209,7 +228,7 @@ tabla, la columna *Comprueba* resume la entrada y la salida esperada.
 | `test_la_confirmacion_ofrece_el_borrado_si_no_hay_datos_de_empleados` | Sin datos de empleados aparece el botón de borrar |
 | `test_la_confirmacion_avisa_antes_si_hay_datos_de_empleados` | Con asignaciones, progreso, intentos o certificados: aviso de bloqueo y sin botón |
 | `test_el_administrador_elimina_un_curso_y_sus_lecciones_en_cascada` | Borrado en cascada de las lecciones |
-| `test_no_se_elimina_un_curso_con_datos_de_empleados` | Con datos de empleados el curso no se borra |
+| `test_no_se_elimina_un_curso_con_datos_de_empleados` | Curso con un empleado asignado: el borrado devuelve un error y el curso sigue existiendo. El borrado con intentos y con certificados se prueba en `EvaluacionAdminTest` y `CertificadoTest`; el de un curso con solo progreso de lecciones no tiene test de borrado (sí de aviso, en `test_la_confirmacion_avisa_antes_si_hay_datos_de_empleados`) |
 | `test_un_empleado_no_puede_acceder_a_ninguna_ruta_de_cursos` | Empleado → 403 en todas las rutas |
 | `test_un_encargado_tampoco_puede_acceder` | Encargado → 403 |
 | `test_un_invitado_es_enviado_al_login` | Sin sesión → redirección al login |
@@ -220,7 +239,7 @@ tabla, la columna *Comprueba* resume la entrada y la salida esperada.
 | Test | Comprueba |
 |---|---|
 | `test_el_listado_muestra_las_lecciones_del_curso_por_orden` | Orden por número de orden |
-| `test_el_formulario_propone_el_siguiente_orden` | Se propone el siguiente número libre |
+| `test_el_formulario_propone_el_siguiente_orden` | Sin lecciones propone 1; con una lección de orden 5 propone 6 (el más alto + 1) |
 | `test_el_administrador_crea_una_leccion_dentro_del_curso` | Alta correcta en su curso |
 | `test_la_validacion_de_lecciones_esta_en_espanol` | Vacíos, orden 0 y orden `abc` → errores en español |
 | `test_el_administrador_edita_una_leccion` | Edición correcta |
@@ -255,7 +274,7 @@ tabla, la columna *Comprueba* resume la entrada y la salida esperada.
 | `test_completar_dos_veces_no_duplica_ni_cambia_la_fecha` | Idempotente |
 | `test_el_porcentaje_es_completadas_entre_totales` | Cálculo del porcentaje |
 | `test_el_progreso_de_otros_empleados_y_cursos_no_cuenta` | El porcentaje no mezcla datos ajenos |
-| `test_un_curso_sin_lecciones_esta_al_0_por_ciento` | Sin lecciones → 0 % (sin división por cero) |
+| `test_un_curso_sin_lecciones_esta_al_0_por_ciento` | Sin lecciones → 0 % |
 | `test_un_empleado_sin_asignacion_no_ve_el_curso_ni_sus_lecciones` | Sin asignación → 403 |
 | `test_un_empleado_no_puede_completar_una_leccion_ajena` | Lección de un curso no asignado → 403 |
 | `test_al_desasignar_se_pierde_el_acceso` | Tras desasignar → 403 |
@@ -279,7 +298,7 @@ tabla, la columna *Comprueba* resume la entrada y la salida esperada.
 | `test_no_se_elimina_una_evaluacion_con_resultados` | Con intentos no se borra |
 | `test_el_administrador_crea_una_pregunta_con_sus_opciones` | Alta de pregunta con opciones |
 | `test_una_pregunta_necesita_al_menos_dos_opciones` | Menos de 2 → error |
-| `test_una_pregunta_necesita_exactamente_una_correcta` | Ninguna correcta o correcta vacía → error |
+| `test_una_pregunta_necesita_exactamente_una_correcta` | Ninguna correcta, correcta vacía o dos marcadas → error |
 | `test_el_formulario_no_falla_al_volver_de_una_peticion_manipulada` | Sin 500 tras una petición manipulada |
 | `test_editar_una_pregunta_reemplaza_sus_opciones` | Las opciones vacías se descartan y se respetan las tildes |
 | `test_el_administrador_elimina_una_pregunta` | Borrado de pregunta |
@@ -319,9 +338,9 @@ tabla, la columna *Comprueba* resume la entrada y la salida esperada.
 | `test_suspender_no_emite_certificado` | Suspenso → sin certificado |
 | `test_solo_se_emite_con_el_primer_aprobado` | Un segundo aprobado no duplica ni cambia la fecha |
 | `test_un_curso_sin_evaluacion_no_certifica` | Sin evaluación → sin certificado |
-| `test_el_certificado_se_ve_en_el_curso_y_en_mis_cursos` | Etiqueta y botón visibles |
+| `test_el_certificado_se_ve_en_el_curso_y_en_mis_cursos` | Texto "Curso certificado el 29/09/2026." en el curso y etiqueta *Certificado* en Mis cursos |
 | `test_el_empleado_descarga_su_certificado_en_pdf` | Respuesta PDF |
-| `test_el_pdf_contiene_nombre_curso_fecha_y_codigo` | Contenido del PDF (código `FX-000001`) |
+| `test_el_pdf_contiene_nombre_curso_fecha_y_codigo` | La plantilla HTML del certificado (la que DomPDF convierte en PDF) contiene nombre, curso, fecha y el código del certificado. No analiza el PDF generado ni comprueba el formato literal `FX-000001` |
 | `test_quien_puede_descargar_un_certificado` | Otro empleado y encargado → 403; administrador → 200; invitado → login |
 | `test_mis_logros_muestra_solo_los_certificados_propios` | No muestra certificados ajenos |
 | `test_mis_logros_solo_para_empleados` | Otros roles → 403 |
@@ -347,13 +366,13 @@ tabla, la columna *Comprueba* resume la entrada y la salida esperada.
 | Test | Comprueba |
 |---|---|
 | `test_el_encargado_busca_empleados_por_nombre` | Búsqueda por nombre |
-| `test_la_busqueda_solo_lista_empleados_y_exige_dos_caracteres` | Mínimo 2 caracteres; no lista otros roles |
+| `test_la_busqueda_solo_lista_empleados_y_exige_dos_caracteres` | Mínimo 2 caracteres; no lista otros roles; `%%` no lista a nadie |
 | `test_la_busqueda_no_registra_consultas` | Buscar no crea filas en el registro |
 | `test_el_encargado_ve_la_ficha_completa` | Cursos, progreso, certificados e insignias |
 | `test_la_ficha_no_tiene_nada_editable_ni_el_pdf` | Sin formularios ni enlace al PDF |
 | `test_la_busqueda_no_tiene_nada_editable` | Sin formularios de edición |
 | `test_solo_se_consultan_fichas_de_empleados` | Ficha de un no empleado → 404 |
-| `test_el_encargado_no_accede_a_rutas_de_edicion_ni_al_pdf` | 403 en todo lo demás |
+| `test_el_encargado_no_accede_a_rutas_de_edicion_ni_al_pdf` | 403 en 11 rutas concretas: listado, alta, edición y borrado de cursos, asignaciones, evaluación, PDF del certificado y registro de consultas |
 | `test_el_administrador_tambien_puede_consultar` | El administrador también accede |
 | `test_cada_consulta_a_una_ficha_crea_una_fila` | Registro de quién, a quién y cuándo |
 | `test_solo_el_administrador_ve_la_pantalla_del_registro` | Encargado y empleado → 403 |
@@ -362,12 +381,12 @@ tabla, la columna *Comprueba* resume la entrada y la salida esperada.
 | `test_un_empleado_no_accede_a_nada_del_modulo` | 403 |
 | `test_los_enlaces_del_menu_segun_el_rol` | Menú según el rol |
 
-### 5.6. Pruebas transversales (18 tests, 86 aserciones)
+### 5.6. Pruebas transversales (21 tests, 110 aserciones)
 
 No pertenecen a un módulo concreto, pero cubren el acceso y la robustez de toda
 la aplicación.
 
-**`AutenticacionTest`** (9 tests)
+**`AutenticacionTest`** (12 tests)
 
 | Test | Comprueba |
 |---|---|
@@ -380,6 +399,9 @@ la aplicación.
 | `test_los_usuarios_de_demostracion_inician_sesion_con_su_perfil` | Cada uno ve su menú |
 | `test_db_seed_por_defecto_no_crea_los_usuarios_de_demostracion` | `db:seed` solo crea el administrador |
 | `test_el_registro_crea_empleados_aunque_se_envie_otro_rol` | Enviar `rol=administrador` al registrarse → se crea un empleado |
+| `test_el_registro_rechaza_un_email_con_formato_invalido` | Correo sin formato válido → error en el correo, sin cuenta ni sesión |
+| `test_el_registro_exige_una_contrasena_de_al_menos_8_caracteres` | Contraseña de 7 caracteres → error en la contraseña, sin cuenta ni sesión |
+| `test_el_registro_rechaza_un_email_ya_registrado` | Correo ya usado → error en el correo; sigue habiendo una sola cuenta con él |
 
 **`EntradaManipuladaTest`** (5 tests)
 
@@ -410,6 +432,5 @@ Laravel y no prueba nada del proyecto (ver el apartado 2).
 - Las pruebas usan SQLite, no MySQL. Las restricciones de clave foránea y los
   índices únicos se comprueban en SQLite.
 - De las longitudes máximas, solo se prueba la del título del curso.
-- No hay campos con máscara ni, por tanto, pruebas de máscaras. El formato del
-  correo electrónico no tiene test propio.
+- No hay campos con máscara ni, por tanto, pruebas de máscaras.
 - No hay pruebas en navegador, visuales ni de rendimiento.
