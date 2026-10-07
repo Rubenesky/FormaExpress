@@ -38,20 +38,20 @@
 
     <h2 class="h5">Insignias</h2>
     <div class="row g-3">
-        @foreach ($catalogo as $hito => $insignia)
-            @php($conseguida = $conseguidas->get($hito))
+        @foreach ($catalogo as $insignia)
+            @php($conseguida = $conseguidas->get($insignia->id))
             <div class="col-sm-6 col-lg-3">
                 <div class="card h-100 {{ $conseguida ? 'border-success' : 'text-muted' }}">
                     <div class="card-body">
                         <h3 class="h6 card-title">
-                            {{ $insignia['nombre'] }}
+                            {{ $insignia->nombre }}
                             @if ($conseguida)
                                 <span class="badge text-bg-success">Conseguida</span>
                             @endif
                         </h3>
-                        <p class="card-text small mb-1">{{ $insignia['descripcion'] }}</p>
+                        <p class="card-text small mb-1">{{ $insignia->descripcion }}</p>
                         @if ($conseguida)
-                            <p class="card-text small text-muted mb-0">{{ $conseguida->created_at->format('d/m/Y') }}</p>
+                            <p class="card-text small text-muted mb-0">{{ $conseguida->pivot->created_at->format('d/m/Y') }}</p>
                         @else
                             <p class="card-text small mb-0">Pendiente</p>
                         @endif

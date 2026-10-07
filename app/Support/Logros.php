@@ -12,8 +12,8 @@ use Illuminate\Support\Facades\DB;
  * intento de evaluación, dentro de la misma transacción.
  *
  * Todo es idempotente: los índices únicos (empleado, curso) de certificados y
- * (empleado, hito) de insignias hacen que insertOrIgnore no duplique nada ni
- * cambie la fecha de lo ya conseguido.
+ * (empleado, insignia) de empleado_insignia hacen que insertOrIgnore no duplique
+ * nada ni cambie la fecha de lo ya conseguido.
  */
 class Logros
 {
@@ -61,11 +61,18 @@ class Logros
             $hitos[] = Insignia::CINCO_CERTIFICADOS;
         }
 
+        // Del código de cada hito a su fila del catálogo.
+        $ids = Insignia::whereIn('codigo', $hitos)->pluck('id', 'codigo');
+
         $nuevas = [];
         foreach ($hitos as $hito) {
-            $concedida = DB::table('insignias')->insertOrIgnore([
+            if (! isset($ids[$hito])) {
+                continue;
+            }
+
+            $concedida = DB::table('empleado_insignia')->insertOrIgnore([
                 'empleado_id' => $empleadoId,
-                'hito' => $hito,
+                'insignia_id' => $ids[$hito],
                 'created_at' => $ahora,
                 'updated_at' => $ahora,
             ]);

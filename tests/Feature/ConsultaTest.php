@@ -38,7 +38,11 @@ class ConsultaTest extends TestCase
         $this->curso->empleadosAsignados()->attach($this->ana->id, ['fecha_asignacion' => '2026-09-01']);
         $this->ana->completarLeccion($leccion);
         DB::table('certificados')->insert(['empleado_id' => $this->ana->id, 'curso_id' => $this->curso->id, 'fecha_emision' => '2026-09-20']);
-        DB::table('insignias')->insert(['empleado_id' => $this->ana->id, 'hito' => Insignia::NOTA_MAXIMA, 'created_at' => '2026-09-20 10:00:00']);
+        DB::table('empleado_insignia')->insert([
+            'empleado_id' => $this->ana->id,
+            'insignia_id' => Insignia::where('codigo', Insignia::NOTA_MAXIMA)->value('id'),
+            'created_at' => '2026-09-20 10:00:00',
+        ]);
     }
 
     private function ficha(?User $empleado = null): string

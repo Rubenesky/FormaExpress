@@ -85,9 +85,9 @@ class HacerEvaluacionController extends Controller
             'certificadoNuevo' => session('certificado_nuevo')
                 ? $request->user()->certificados()->find(session('certificado_nuevo'))
                 : null,
-            'insigniasNuevas' => collect(session('insignias_nuevas', []))
-                ->filter(fn ($hito) => isset(Insignia::CATALOGO[$hito]))
-                ->map(fn ($hito) => Insignia::CATALOGO[$hito]['nombre']),
+            'insigniasNuevas' => Insignia::whereIn('codigo', session('insignias_nuevas', []))
+                ->orderBy('id')
+                ->pluck('nombre'),
         ]);
     }
 }

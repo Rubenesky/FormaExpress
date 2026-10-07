@@ -63,8 +63,8 @@
         <ul class="list-group">
             @foreach ($insignias as $insignia)
                 <li class="list-group-item d-flex justify-content-between">
-                    <span>{{ $insignia->nombre() }}</span>
-                    <span class="text-muted small">{{ $insignia->created_at->format('d/m/Y') }}</span>
+                    <span>{{ $insignia->nombre }}</span>
+                    <span class="text-muted small">{{ $insignia->pivot->created_at->format('d/m/Y') }}</span>
                 </li>
             @endforeach
         </ul>

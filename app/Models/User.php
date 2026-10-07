@@ -37,9 +37,13 @@ class User extends Authenticatable
         return $this->hasMany(Certificado::class, 'empleado_id');
     }
 
-    public function insignias(): HasMany
+    /**
+     * Insignias conseguidas (tabla empleado_insignia); la fecha está en pivot->created_at.
+     */
+    public function insignias(): BelongsToMany
     {
-        return $this->hasMany(Insignia::class, 'empleado_id');
+        return $this->belongsToMany(Insignia::class, 'empleado_insignia', 'empleado_id', 'insignia_id')
+            ->withTimestamps();
     }
 
     public function tieneAsignado(Curso $curso): bool

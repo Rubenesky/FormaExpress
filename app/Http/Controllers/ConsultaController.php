@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Insignia;
 use App\Models\RegistroConsulta;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -59,8 +58,7 @@ class ConsultaController extends Controller
             ->get();
 
         $certificados = $empleado->certificados()->get()->keyBy('curso_id');
-        $insignias = $empleado->insignias()->orderBy('created_at')->get()
-            ->filter(fn ($insignia) => isset(Insignia::CATALOGO[$insignia->hito]));
+        $insignias = $empleado->insignias()->orderByPivot('created_at')->get();
 
         return view('consulta.ficha', compact('empleado', 'cursos', 'certificados', 'insignias'));
     }

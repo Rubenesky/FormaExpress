@@ -131,10 +131,22 @@ EXIT;
 
 Si usaste otro nombre en `DB_DATABASE`, usa ese mismo aquí.
 
-> La creación de un usuario de MySQL propio para la aplicación, con permisos
-> solo sobre esta base de datos, forma parte de la Tarea 2 y todavía no está
-> documentada. Mientras tanto, usa un usuario existente con permisos sobre
-> `formaexpress`.
+### Usuario de MySQL propio (opcional en local, recomendado si se despliega)
+
+`database/sql/03_usuarios_y_privilegios.sql` crea dos cuentas de MySQL:
+`formaexpress_app`, que lee y escribe datos pero no puede crear ni borrar
+tablas, y `formaexpress_lectura`, de solo lectura. Para desarrollo y evaluación
+en local puedes saltarte este paso y usar root (o el usuario que ya tengas). Si
+el proyecto se despliega online, usa `formaexpress_app` en `DB_USERNAME` y
+`DB_PASSWORD`. Las migraciones del paso 7 crean tablas, así que se ejecutan con
+root (o un usuario administrador) antes de cambiar el `.env`. Las instrucciones
+están en la cabecera del propio script.
+
+> ⚠️ **AVISO IMPORTANTE: el script trae marcadores, no contraseñas**
+> (`CAMBIA_ESTA_CONTRASENA_APP` y `CAMBIA_ESTA_CONTRASENA_LECTURA`).
+> Sustitúyelos por contraseñas propias antes de ejecutarlo y no las guardes en
+> el repositorio. **No uses nunca contraseñas de ejemplo si el proyecto se
+> despliega de verdad.**
 
 ---
 
@@ -175,7 +187,13 @@ Crea dos usuarios para probar los otros perfiles:
 | Encargado | `encargado@formaexpress.test` | `encargado1234` |
 
 Este seeder **solo** crea esos dos usuarios: no crea cursos ni ningún otro dato.
-No es el conjunto de datos de prueba de la Tarea 2 (pendiente).
+No es el conjunto de datos de prueba de la Tarea 2: ese está en
+`database/sql/02_datos_de_prueba.sql` (8 usuarios, cursos, progreso,
+certificados e insignias; contraseña de todos: `prueba1234`). Se carga con el
+cliente de MySQL (`mysql -u root -p < database/sql/02_datos_de_prueba.sql`) en
+una base de datos vacía: creada con `database/sql/01_crear_base_de_datos.sql`
+o recién migrada (paso 7) **sin** ejecutar los seeders de este paso, porque usa
+los mismos id. El script carga los datos en la base de datos `formaexpress`.
 
 Los dos seeders se pueden ejecutar más de una vez sin duplicar usuarios.
 
@@ -239,5 +257,6 @@ necesitan además la extensión **`pdo_sqlite`** de PHP. Deben pasar todos.
 ## Pendiente
 
 - **Despliegue online:** no existe todavía ninguna URL pública de la aplicación.
-- **Usuario de MySQL propio para la aplicación** (Tarea 2).
-- **Datos de prueba** de la Tarea 2 (5-10 registros por tabla).
+- Los scripts SQL de la Tarea 2 (creación de la base de datos, datos de prueba
+  y usuarios de MySQL) ya no están pendientes: están en `database/sql/`. Ver el
+  paso 6 y el apartado 8.2.

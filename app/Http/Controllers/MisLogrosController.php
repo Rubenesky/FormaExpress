@@ -16,12 +16,12 @@ class MisLogrosController extends Controller
         $empleado = $request->user();
 
         $certificados = $empleado->certificados()->with('curso')->orderByDesc('fecha_emision')->orderByDesc('id')->get();
-        $conseguidas = $empleado->insignias()->get()->keyBy('hito');
+        $conseguidas = $empleado->insignias()->get()->keyBy('id');
 
         return view('mis-logros.index', [
             'certificados' => $certificados,
             'conseguidas' => $conseguidas,
-            'catalogo' => Insignia::CATALOGO,
+            'catalogo' => Insignia::orderBy('id')->get(),
         ]);
     }
 }

@@ -61,10 +61,20 @@ class InsigniaTest extends TestCase
         return $this->actingAs($this->empleado)->post("/mis-cursos/{$curso->id}/evaluacion", ['respuestas' => $respuestas]);
     }
 
-    /** @return list<string> */
+    /** @return list<string> códigos de las insignias concedidas al empleado */
     private function hitos(): array
     {
-        return DB::table('insignias')->where('empleado_id', $this->empleado->id)->orderBy('hito')->pluck('hito')->all();
+        return DB::table('empleado_insignia')
+            ->join('insignias_catalogo', 'insignias_catalogo.id', '=', 'empleado_insignia.insignia_id')
+            ->where('empleado_insignia.empleado_id', $this->empleado->id)
+            ->orderBy('insignias_catalogo.codigo')
+            ->pluck('insignias_catalogo.codigo')
+            ->all();
+    }
+
+    private function idDe(string $codigo): int
+    {
+        return Insignia::where('codigo', $codigo)->value('id');
     }
 
     public function test_aprobar_al_primer_intento_da_primer_intento_y_primer_certificado(): void
@@ -122,16 +132,17 @@ class InsigniaTest extends TestCase
             ->assertDontSee('Nueva insignia')
             ->assertDontSee('Nuevas insignias');
 
-        $this->assertSame(1, DB::table('insignias')->where('hito', Insignia::NOTA_MAXIMA)->count());
-        $this->assertSame(3, DB::table('insignias')->count());
+        $this->assertSame(1, DB::table('empleado_insignia')->where('insignia_id', $this->idDe(Insignia::NOTA_MAXIMA))->count());
+        $this->assertSame(3, DB::table('empleado_insignia')->count());
     }
 
     public function test_la_base_de_datos_impide_duplicar_una_insignia(): void
     {
-        DB::table('insignias')->insert(['empleado_id' => $this->empleado->id, 'hito' => Insignia::NOTA_MAXIMA]);
+        $fila = ['empleado_id' => $this->empleado->id, 'insignia_id' => $this->idDe(Insignia::NOTA_MAXIMA)];
+        DB::table('empleado_insignia')->insert($fila);
 
         $this->expectException(QueryException::class);
-        DB::table('insignias')->insert(['empleado_id' => $this->empleado->id, 'hito' => Insignia::NOTA_MAXIMA]);
+        DB::table('empleado_insignia')->insert($fila);
     }
 
     public function test_mis_logros_muestra_conseguidas_y_pendientes(): void
@@ -141,8 +152,8 @@ class InsigniaTest extends TestCase
 
         $respuesta = $this->actingAs($this->empleado)->get('/mis-logros')->assertOk();
 
-        foreach (Insignia::CATALOGO as $insignia) {
-            $respuesta->assertSee($insignia['nombre']);
+        foreach (Insignia::all() as $insignia) {
+            $respuesta->assertSee($insignia->nombre);
         }
         $this->assertSame(3, substr_count($respuesta->getContent(), '>Conseguida</span>'));
         $this->assertSame(1, substr_count($respuesta->getContent(), '>Pendiente</p>'));

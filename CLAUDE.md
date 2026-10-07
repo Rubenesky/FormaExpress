@@ -34,9 +34,9 @@ cambio de personal.
 - Tests: PHPUnit.
 - Entorno local: Laragon. Control de versiones: Git/GitHub.
 
-## Modelo de datos (12 tablas de dominio, ninguna aislada)
-Ampliado de 8 a 11 al escribir las migraciones y a 12 con el registro RGPD
-(`registro_consultas`); se formaliza en la Tarea 2.
+## Modelo de datos (13 tablas de dominio, ninguna aislada)
+Ampliado de 8 a 11 al escribir las migraciones, a 12 con el registro RGPD
+(`registro_consultas`) y a 13 al separar el catálogo de insignias (Tarea 2).
 - empleados — **es la tabla de usuarios** (login). Columnas de auth en inglés
   (name, email, password) porque Laravel las espera; `rol` ENUM
   administrador/empleado/encargado. El modelo es `App\Models\User` con
@@ -60,22 +60,50 @@ Migraciones añadidas en el módulo 2 (decididas por el usuario):
 resultados_evaluacion.aprobado (boolean: se guarda con la nota mínima vigente
 en ese intento, así que cambiar nota_minima no altera intentos pasados).
 - certificados (FK empleado + curso, fecha_emision; único por par)
-- insignias (FK empleado, hito conseguido)
+- insignias_catalogo (codigo único, nombre, descripcion; sin timestamps). Las
+  4 filas las crea la migración `2026_10_07_000001`; `codigo` es la clave
+  estable que usa la app (constantes de `App\Models\Insignia`).
+- empleado_insignia (FK empleado + FK insignias_catalogo; la fecha de
+  concesión es created_at; única por (empleado_id, insignia_id)). Era la tabla
+  `insignias` con `hito` de texto libre: la migración `2026_10_07_000002` la
+  renombró y tradujo cada hito a su insignia_id (aborta sin cambiar nada si
+  algún hito no está en el catálogo). En MySQL, su FK de empleado_id conserva
+  el nombre antiguo `insignias_empleado_id_foreign` (renombrar una tabla no
+  renombra sus restricciones y SQLite no deja borrar una FK por nombre).
 - registro_consultas (RGPD: consultor_id y consultado_id, ambas FK a
-  empleados con **RESTRICT**, y consultado_en). Migración `2026_09_29_000002`,
+  empleados con ON DELETE NO ACTION, y consultado_en). Migración `2026_09_29_000002`,
   aprobada por el usuario. Solo se inserta: sin updated_at ni rutas de
   edición/borrado.
 
-Borrados: cascada dentro de la estructura del curso (lecciones, evaluaciones,
-preguntas, opciones); el historial del empleado bloquea borrados (FK RESTRICT:
-el controlador captura el error 23000 y muestra un mensaje, nunca un 500).
+Borrados: 4 FK con ON DELETE CASCADE, dentro de la estructura del curso
+(lecciones, evaluaciones, preguntas, opciones). Las otras **12 FK son
+ON DELETE NO ACTION** (la regla por defecto de MySQL, equivalente a RESTRICT
+en InnoDB; ninguna declara RESTRICT de forma explícita): el historial del
+empleado bloquea borrados y el controlador captura el error 23000 y muestra
+un mensaje, nunca un 500.
 Excepción: **ninguna FK impide desasignar un curso con progreso**; se comprueba
 en la app (`Curso::tieneProgresoDe()`), decisión del usuario.
 
-**Pendiente de la Tarea 2 real (no tocar todavía):**
-- **Usuarios y privilegios de MySQL** (usuario propio para la app en vez de root).
-- **Datos de prueba** (script de carga, 5-10 registros por tabla).
-- Insignias como catálogo + relación (ver módulo 3).
+**Tarea 2: hecho** (scripts en `database/sql/`, verificados en bases de datos
+MySQL temporales que se borraron después):
+- `01_crear_base_de_datos.sql`: las 13 tablas de dominio y las 4 filas del
+  catálogo de insignias, generado desde SHOW CREATE TABLE del esquema migrado;
+  cada FK lleva comentada su regla real. Crea un esquema idéntico al real
+  (comparado en information_schema). No incluye las tablas internas de Laravel:
+  para instalar la app se usa `php artisan migrate`.
+- `02_datos_de_prueba.sql`: 5-10 filas por tabla (el catálogo tiene 4, es fijo),
+  coherentes con las reglas de la app (certificado ⇒ asignación, 100 % de
+  lecciones y primer aprobado; insignias = las que daría `Logros`). Una pregunta
+  por evaluación (notas 0 o 10) para no pasar de 10 opciones. Contraseña de
+  todos: `prueba1234`. **No está cargado en la BD local**: lo hace el usuario a
+  mano.
+- `03_usuarios_y_privilegios.sql`: `formaexpress_app` (SELECT/INSERT/UPDATE/
+  DELETE, sin DDL) y `formaexpress_lectura` (SELECT), con contraseñas de
+  marcador. Las migraciones necesitan un usuario con DDL. **No están creados en
+  el servidor** y el `.env` local sigue con root: lo hace el usuario a mano.
+
+**Pendiente de la Tarea 2:** diagrama E-R y paso a modelo relacional (no hay
+nada de eso en el repositorio).
 
 ## Funcionalidad
 - CRUD de cursos y lecciones (administrador).
@@ -114,11 +142,13 @@ en la app (`Curso::tieneProgresoDe()`), decisión del usuario.
 - PDF con DomPDF (`barryvdh/laravel-dompdf`), A4 apaisado, fuente DejaVu Sans
   con subsetting (~17 KB). Código visible `FX-000001` (id con ceros).
   Descarga: el propio empleado o un administrador (Gate `ver-certificado`).
-- Insignias automáticas, catálogo fijo en `Insignia::CATALOGO`:
+- Insignias automáticas, catálogo en la tabla `insignias_catalogo` (modelo
+  `App\Models\Insignia`, con los códigos como constantes):
   `primer-certificado`, `cinco-certificados`, `nota-maxima` (un 10) y
   `primer-intento` (aprobar sin suspensos previos en esa evaluación).
-  Migración `2026_09_29_000001`: unique(insignias.empleado_id, hito).
-  El catálogo como tabla propia sigue pendiente para la Tarea 2.
+  Las concedidas están en `empleado_insignia` (`User::insignias()`,
+  belongsToMany; la fecha en `pivot->created_at`), únicas por
+  (empleado_id, insignia_id).
 - Pantallas: "Mis logros" (empleado: certificados con PDF e insignias
   conseguidas/pendientes), aviso de logros nuevos tras cada intento, certificado
   en el detalle del curso y columna "Certificado" en las asignaciones (admin).
@@ -214,7 +244,7 @@ así que el backend no se toca de lenguaje bajo ningún concepto.
 - `docs/instalacion.md`: guía de instalación en local, verificada de principio a
   fin en un clon limpio (BD aparte, PHP 8.3, sin los archivos de este equipo).
 - `docs/manual-usuario.md`: manual por perfil con la tabla de usuarios de prueba.
-- `docs/pruebas.md`: documentación de la batería de pruebas (137 tests, 634
+- `docs/pruebas.md`: documentación de la batería de pruebas (140 tests, 658
   aserciones; todo integración, sin unitarias reales; sin máscaras en el
   proyecto). Si se añaden tests, actualizar sus cifras y tablas.
 
@@ -231,8 +261,8 @@ así que el backend no se toca de lenguaje bajo ningún concepto.
     solo dice "unos minutos".
   - Al parar `php artisan serve` en Windows puede quedar un proceso `php` hijo
     que bloquea la carpeta; no afecta a la guía, solo a borrar el clon.
-- Usuario MySQL propio de la aplicación y datos de prueba: siguen en la Tarea 2
-  (la guía usa un usuario existente mientras tanto).
+- ~~**Usuario MySQL propio y datos de prueba**~~ — hecho: scripts en
+  `database/sql/` (la guía remite a ellos). Aplicarlos es manual.
 
 ## Cómo proponer pasos y verificar el trabajo
 Cuando termines un módulo y quieras proponer el siguiente paso, hazlo como
