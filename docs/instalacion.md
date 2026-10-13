@@ -3,8 +3,21 @@
 Esta guía explica cómo poner FormaExpress en marcha en un equipo nuevo para
 desarrollo o evaluación en local. Sirve igual en Windows, macOS y Linux.
 
-> **Despliegue online: pendiente.** Todavía no existe ninguna versión publicada
-> en internet ni URL de acceso. Esta guía solo cubre la instalación en local.
+> **Despliegue online:** https://formaexpress.gt.tc, alojado en InfinityFree
+> (hosting gratuito). Esta guía solo cubre la instalación en local.
+>
+> ⚠️ **Credenciales de prueba en el despliegue online:** son las de
+> `database/sql/02_datos_de_prueba.sql` (por ejemplo,
+> `laura.gomez@formaexpress.test` / `prueba1234` para la administradora), **no**
+> las del seeder de Laravel (`admin@formaexpress.test`). En InfinityFree no hay
+> acceso SSH, así que allí no se ha podido ejecutar el seeder.
+>
+> Es un despliegue **de evaluación**, para que el profesorado pueda probar la
+> aplicación en funcionamiento, no un despliegue de producción. Por eso usa a
+> propósito las contraseñas públicas de los datos de prueba. No contradice el
+> aviso de no usar las contraseñas de ejemplo si el proyecto se despliega de
+> verdad (apartado 8.2 y paso 6): ese aviso seguirá aplicándose el día que haya
+> un despliegue real, que no es este.
 
 ---
 
@@ -256,7 +269,9 @@ necesitan además la extensión **`pdo_sqlite`** de PHP. Deben pasar todos.
 
 ## Pendiente
 
-- **Despliegue online:** no existe todavía ninguna URL pública de la aplicación.
+- El despliegue online ya no está pendiente: https://formaexpress.gt.tc
+  (InfinityFree). Ver al principio de la guía qué credenciales de prueba sirven
+  allí.
 - Los scripts SQL de la Tarea 2 (creación de la base de datos, datos de prueba
   y usuarios de MySQL) ya no están pendientes: están en `database/sql/`. Ver el
   paso 6 y el apartado 8.2.

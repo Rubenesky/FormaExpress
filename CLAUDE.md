@@ -249,8 +249,11 @@ así que el backend no se toca de lenguaje bajo ningún concepto.
   proyecto). Si se añaden tests, actualizar sus cifras y tablas.
 
 **Pendiente de verdad:**
-- **URL de hosting / despliegue online:** no existe. Ambos documentos lo marcan
-  como pendiente; cuando haya URL, añadirla en los dos.
+- ~~**URL de hosting / despliegue online**~~ — hecho: https://formaexpress.gt.tc
+  (InfinityFree, gratuito). Credenciales de prueba allí: las de
+  `database/sql/02_datos_de_prueba.sql` (administradora
+  laura.gomez@formaexpress.test / prueba1234), NO las del seeder de Laravel
+  (admin@formaexpress.test): sin acceso SSH, el seeder no se pudo ejecutar.
 - ~~**Repositorio sin remoto**~~ — hecho: https://github.com/Rubenesky/FormaExpress
   (privado por ahora; la guía ya usa esa URL en el `git clone`).
 - ~~**Documento de pruebas**~~ — hecho: `docs/pruebas.md`.

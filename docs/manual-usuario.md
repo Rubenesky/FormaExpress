@@ -268,5 +268,19 @@ No hay ningún botón para crear, editar ni borrar.
   avisa, pero no lo impide).
 - La interfaz necesita **conexión a internet** para cargar los estilos
   (Bootstrap desde un CDN).
-- **Despliegue online pendiente:** todavía no existe ninguna versión publicada en
-  internet.
+- **Despliegue online:** https://formaexpress.gt.tc, alojado en InfinityFree
+  (hosting gratuito).
+
+  > ⚠️ **Credenciales de prueba en el despliegue online:** son las de
+  > `database/sql/02_datos_de_prueba.sql` (por ejemplo,
+  > `laura.gomez@formaexpress.test` / `prueba1234` para la administradora),
+  > **no** las del seeder de Laravel (`admin@formaexpress.test`). En
+  > InfinityFree no hay acceso SSH, así que allí no se ha podido ejecutar el
+  > seeder.
+  >
+  > Es un despliegue **de evaluación**, para que el profesorado pueda probar la
+  > aplicación en funcionamiento, no un despliegue de producción. Por eso usa a
+  > propósito las contraseñas públicas de los datos de prueba. No contradice el
+  > aviso de no usar las contraseñas de ejemplo si el proyecto se despliega de
+  > verdad: ese aviso seguirá aplicándose el día que haya un despliegue real,
+  > que no es este.
