@@ -24,7 +24,7 @@
             @else
                 <form method="POST" action="{{ route('mis-lecciones.completar', $leccion) }}">
                     @csrf
-                    <button type="submit" class="btn btn-success">Marcar como completada</button>
+                    <button type="submit" class="btn btn-acento">Marcar como completada</button>
                 </form>
             @endif
 

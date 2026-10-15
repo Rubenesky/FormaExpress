@@ -37,13 +37,14 @@
                                 </div>
                                 <div class="progress" role="progressbar" aria-label="Progreso de {{ $curso->titulo }}"
                                      aria-valuenow="{{ $curso->porcentajeProgreso() }}" aria-valuemin="0" aria-valuemax="100">
-                                    <div class="progress-bar @if ($curso->porcentajeProgreso() === 100) bg-success @endif"
-                                         style="width: {{ $curso->porcentajeProgreso() }}%"></div>
+                                    <div class="progress-bar" style="width: {{ $curso->porcentajeProgreso() }}%"></div>
                                 </div>
                             </td>
                             <td>
                                 @if ($certificado = $certificados->get($curso->id))
-                                    <span class="badge text-bg-success">Certificado</span>
+                                    <span class="badge text-bg-primary">
+                                        <svg class="fx-icono" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false"><circle cx="8" cy="6" r="4.5"/><path d="M5.2 9.6 4 15.5l4-1.8 4 1.8-1.2-5.9a5.6 5.6 0 0 1-5.6 0z"/></svg>
+                                        Certificado</span>
                                     {{ $certificado->fecha_emision->format('d/m/Y') }}
                                 @else
                                     <span class="text-muted">No</span>

@@ -30,14 +30,15 @@
     </div>
 
     @if ($certificadoNuevo)
-        <div class="alert alert-success d-flex flex-wrap justify-content-between align-items-center gap-2" role="alert">
+        <div class="alert alert-primary d-flex flex-wrap justify-content-between align-items-center gap-2" role="alert">
             <span><strong>¡Enhorabuena!</strong> Has obtenido el certificado del curso.</span>
-            <a href="{{ route('certificados.pdf', $certificadoNuevo) }}" class="btn btn-sm btn-success">Descargar certificado</a>
+            <a href="{{ route('certificados.pdf', $certificadoNuevo) }}" class="btn btn-sm btn-primary">Descargar certificado</a>
         </div>
     @endif
 
     @if ($insigniasNuevas->isNotEmpty())
-        <div class="alert alert-info" role="alert">
+        <div class="alert alert-acento" role="alert">
+            <span class="fx-icono-acento" aria-hidden="true">&#9733;</span>
             {{ $insigniasNuevas->count() === 1 ? 'Nueva insignia:' : 'Nuevas insignias:' }}
             <strong>{{ $insigniasNuevas->implode(', ') }}</strong>.
             <a href="{{ route('mis-logros.index') }}">Ver mis logros</a>

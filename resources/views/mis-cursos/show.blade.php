@@ -12,9 +12,9 @@
     <h1 class="h3">{{ $curso->titulo }}</h1>
 
     @if ($certificado)
-        <div class="alert alert-success d-flex flex-wrap justify-content-between align-items-center gap-2" role="alert">
+        <div class="alert alert-primary d-flex flex-wrap justify-content-between align-items-center gap-2" role="alert">
             <span>Curso certificado el {{ $certificado->fecha_emision->format('d/m/Y') }}.</span>
-            <a href="{{ route('certificados.pdf', $certificado) }}" class="btn btn-sm btn-success">Descargar certificado</a>
+            <a href="{{ route('certificados.pdf', $certificado) }}" class="btn btn-sm btn-primary">Descargar certificado</a>
         </div>
     @endif
     @if ($curso->descripcion)
@@ -27,8 +27,7 @@
     </div>
     <div class="progress mb-4" role="progressbar" aria-label="Progreso del curso"
          aria-valuenow="{{ $curso->porcentajeProgreso() }}" aria-valuemin="0" aria-valuemax="100">
-        <div class="progress-bar @if ($curso->porcentajeProgreso() === 100) bg-success @endif"
-             style="width: {{ $curso->porcentajeProgreso() }}%"></div>
+        <div class="progress-bar" style="width: {{ $curso->porcentajeProgreso() }}%"></div>
     </div>
 
     @if ($lecciones->isEmpty())

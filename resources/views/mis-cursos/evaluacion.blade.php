@@ -46,7 +46,7 @@
             </fieldset>
         @endforeach
 
-        <button type="submit" class="btn btn-primary">Enviar respuestas</button>
+        <button type="submit" class="btn btn-acento">Enviar respuestas</button>
         <a href="{{ route('mis-cursos.show', $curso) }}" class="btn btn-link">Cancelar</a>
     </form>
 </div>
