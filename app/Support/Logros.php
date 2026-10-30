@@ -43,23 +43,14 @@ class Logros
         }
 
         // Insignias: se comprueban todas en cada intento y solo se guardan las nuevas.
-        $hitos = [];
+        $certificadosTotales = DB::table('certificados')->where('empleado_id', $empleadoId)->count();
 
-        if ($resultado->aprobado && self::esPrimerIntento($resultado)) {
-            $hitos[] = Insignia::PRIMER_INTENTO;
-        }
-
-        if ((int) round((float) $resultado->nota * 100) === 1000) {
-            $hitos[] = Insignia::NOTA_MAXIMA;
-        }
-
-        $certificados = DB::table('certificados')->where('empleado_id', $empleadoId)->count();
-        if ($certificados >= 1) {
-            $hitos[] = Insignia::PRIMER_CERTIFICADO;
-        }
-        if ($certificados >= 5) {
-            $hitos[] = Insignia::CINCO_CERTIFICADOS;
-        }
+        $hitos = self::hitos(
+            aprobado: (bool) $resultado->aprobado,
+            nota: (float) $resultado->nota,
+            esPrimerIntento: $resultado->aprobado && self::esPrimerIntento($resultado),
+            certificadosTotales: $certificadosTotales,
+        );
 
         // Del código de cada hito a su fila del catálogo.
         $ids = Insignia::whereIn('codigo', $hitos)->pluck('id', 'codigo');
@@ -83,6 +74,36 @@ class Logros
         }
 
         return ['certificado' => $certificado, 'insignias' => $nuevas];
+    }
+
+    /**
+     * Qué insignias corresponden a un resultado, sin tocar la base de datos.
+     * $certificadosTotales incluye el certificado de este intento, si se
+     * acaba de emitir (se cuenta después de intentar emitirlo).
+     *
+     * @return list<string> códigos de Insignia (pueden repetirse hitos ya
+     *                       conseguidos antes: registrar() filtra los nuevos)
+     */
+    public static function hitos(bool $aprobado, float $nota, bool $esPrimerIntento, int $certificadosTotales): array
+    {
+        $hitos = [];
+
+        if ($aprobado && $esPrimerIntento) {
+            $hitos[] = Insignia::PRIMER_INTENTO;
+        }
+
+        if ((int) round($nota * 100) === 1000) {
+            $hitos[] = Insignia::NOTA_MAXIMA;
+        }
+
+        if ($certificadosTotales >= 1) {
+            $hitos[] = Insignia::PRIMER_CERTIFICADO;
+        }
+        if ($certificadosTotales >= 5) {
+            $hitos[] = Insignia::CINCO_CERTIFICADOS;
+        }
+
+        return $hitos;
     }
 
     /**

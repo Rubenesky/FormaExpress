@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Calificador;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -67,18 +68,16 @@ class Evaluacion extends Model
         return [
             'aciertos' => $aciertos,
             'total' => $total,
-            // Sin penalización por fallo, escala 0-10 y 2 decimales.
-            'nota' => $total > 0 ? round($aciertos / $total * 10, 2) : 0.0,
+            'nota' => Calificador::nota($aciertos, $total),
             'falladas' => $falladas,
         ];
     }
 
     /**
-     * ¿La nota alcanza la nota mínima? Se compara en céntimos enteros para
-     * que el límite exacto (8.00 frente a 8.00) no dependa de decimales flotantes.
+     * ¿La nota alcanza la nota mínima?
      */
     public function aprueba(float $nota): bool
     {
-        return (int) round($nota * 100) >= (int) round((float) $this->nota_minima * 100);
+        return Calificador::aprueba($nota, (float) $this->nota_minima);
     }
 }

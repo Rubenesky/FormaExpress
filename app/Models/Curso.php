@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Calificador;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -46,11 +47,7 @@ class Curso extends Model
      */
     public function porcentajeProgreso(): int
     {
-        if (! $this->lecciones_count) {
-            return 0;
-        }
-
-        return (int) round($this->completadas_count / $this->lecciones_count * 100);
+        return Calificador::progreso((int) $this->completadas_count, (int) $this->lecciones_count);
     }
 
     /**
