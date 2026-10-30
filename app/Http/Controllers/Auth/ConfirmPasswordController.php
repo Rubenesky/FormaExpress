@@ -36,4 +36,22 @@ class ConfirmPasswordController extends Controller
     {
         $this->middleware('auth');
     }
+
+    /**
+     * Reglas de validación de la contraseña.
+     *
+     * Sobreescribe las del trait (`required|current_password:web`, sin
+     * `string`): si `password` llega como array (petición manipulada), la
+     * regla `current_password` llama a `Hash::check()` → `password_verify()`
+     * con un array y PHP lanza un `TypeError` (500) en vez de un error de
+     * validación. `bail` es imprescindible: sin él, Laravel ejecuta todas
+     * las reglas del campo aunque `string` ya haya fallado, y `current_password`
+     * se dispara igual; con `bail`, se detiene en la primera regla que falla.
+     *
+     * @return array<string, string>
+     */
+    protected function rules()
+    {
+        return ['password' => 'bail|required|string|current_password:web'];
+    }
 }

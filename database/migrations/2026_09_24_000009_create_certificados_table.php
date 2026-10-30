@@ -18,6 +18,8 @@ return new class extends Migration
             $table->date('fecha_emision');
             $table->timestamps();
 
+            // Como mucho un certificado por empleado y curso: el primer aprobado
+            // lo emite, y aprobar otra vez no crea una fila nueva ni cambia la fecha.
             $table->unique(['empleado_id', 'curso_id']);
         });
     }

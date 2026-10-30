@@ -26,6 +26,9 @@ class HacerEvaluacionController extends Controller
     {
         $evaluacion = $curso->evaluacion()->with('preguntas')->firstOrFail();
 
+        // Las reglas se construyen aquí, no en un Form Request: el número de
+        // preguntas (y por tanto de reglas, una por pregunta) depende de la
+        // evaluación de este curso en concreto, no es fijo.
         // Todas las preguntas son obligatorias; un envío incompleto no cuenta como intento.
         $reglas = ['respuestas' => ['required', 'array']];
         foreach ($evaluacion->preguntas as $pregunta) {

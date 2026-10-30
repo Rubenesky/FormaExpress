@@ -82,7 +82,7 @@ class Logros
      * acaba de emitir (se cuenta después de intentar emitirlo).
      *
      * @return list<string> códigos de Insignia (pueden repetirse hitos ya
-     *                       conseguidos antes: registrar() filtra los nuevos)
+     *                      conseguidos antes: registrar() filtra los nuevos)
      */
     public static function hitos(bool $aprobado, float $nota, bool $esPrimerIntento, int $certificadosTotales): array
     {

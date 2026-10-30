@@ -61,6 +61,10 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        // $data solo se lee de los 3 campos de abajo: cualquier "rol" (u otro
+        // campo) manipulado en el formulario de registro se ignora. Todo
+        // registro público crea un empleado (ver
+        // AutenticacionTest::test_el_registro_crea_empleados_aunque_se_envie_otro_rol).
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],

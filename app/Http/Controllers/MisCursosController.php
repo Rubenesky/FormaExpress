@@ -48,7 +48,11 @@ class MisCursosController extends Controller
         $curso = $leccion->curso;
         $completada = $request->user()->leccionesCompletadas()->whereKey($leccion->id)->first();
 
-        // Lección siguiente en el mismo orden que el detalle del curso.
+        // Lección siguiente en el mismo orden que el detalle del curso. Este
+        // método asume que $leccion pertenece a $curso (lo garantiza el Gate
+        // ver-leccion de la ruta, no el propio método): si no fuera así,
+        // search() devolvería false y, al sumarle 1, apuntaría a la lección
+        // de índice 1 de otro curso en vez de fallar.
         $lista = $curso->lecciones()->orderBy('id')->get(['id', 'titulo']);
         $siguiente = $lista->get($lista->search(fn ($l) => $l->id === $leccion->id) + 1);
 

@@ -43,7 +43,11 @@ class EntradaManipuladaTest extends TestCase
     public function test_formularios_del_administrador(): void
     {
         $leccion = $this->curso->lecciones()->create(['titulo' => 'L1', 'contenido' => 'x', 'orden' => 1]);
-        $this->curso->evaluacion()->create(['titulo' => 'Test', 'nota_minima' => 8]);
+        $evaluacion = $this->curso->evaluacion()->create(['titulo' => 'Test', 'nota_minima' => 8]);
+        $pregunta = $evaluacion->preguntas()->create(['enunciado' => 'P1']);
+        $pregunta->opciones()->create(['texto' => 'A', 'es_correcta' => true]);
+        $pregunta->opciones()->create(['texto' => 'B', 'es_correcta' => false]);
+        $sinEvaluacion = Curso::create(['titulo' => 'Sin evaluación']);
         $c = $this->curso->id;
 
         $this->assertVuelveSinError($this->admin, '/cursos/create', '/cursos', ['titulo' => ['x']]);
@@ -51,15 +55,23 @@ class EntradaManipuladaTest extends TestCase
         $this->assertVuelveSinError($this->admin, "/cursos/{$c}/lecciones/create", "/cursos/{$c}/lecciones", ['titulo' => ['x'], 'contenido' => ['y'], 'orden' => ['1']]);
         $this->assertVuelveSinError($this->admin, "/cursos/{$c}/lecciones/{$leccion->id}/edit", "/cursos/{$c}/lecciones/{$leccion->id}", ['titulo' => ['x'], 'contenido' => 'y', 'orden' => 1], 'put');
         $this->assertVuelveSinError($this->admin, "/cursos/{$c}/asignaciones", "/cursos/{$c}/asignaciones", ['empleado_id' => ['1']]);
+        $this->assertVuelveSinError($this->admin, "/cursos/{$sinEvaluacion->id}/evaluacion/create", "/cursos/{$sinEvaluacion->id}/evaluacion", ['titulo' => ['x'], 'nota_minima' => ['5']]);
         $this->assertVuelveSinError($this->admin, "/cursos/{$c}/evaluacion/edit", "/cursos/{$c}/evaluacion", ['titulo' => ['x'], 'nota_minima' => ['5']], 'put');
         $this->assertVuelveSinError($this->admin, "/cursos/{$c}/evaluacion/preguntas/create", "/cursos/{$c}/evaluacion/preguntas", [
             'enunciado' => ['x'], 'opciones' => [['a'], 'b'], 'correcta' => [0, 1],
         ]);
+        $this->assertVuelveSinError($this->admin, "/cursos/{$c}/evaluacion/preguntas/{$pregunta->id}/edit", "/cursos/{$c}/evaluacion/preguntas/{$pregunta->id}", [
+            'enunciado' => ['x'], 'opciones' => [['a'], 'b'], 'correcta' => [0, 1],
+        ], 'put');
 
-        $this->assertDatabaseCount('cursos', 1);
+        $this->assertDatabaseCount('cursos', 2);
         $this->assertDatabaseHas('cursos', ['id' => $c, 'titulo' => 'Caja']);
         $this->assertDatabaseCount('lecciones', 1);
-        $this->assertDatabaseCount('preguntas', 0);
+        $this->assertDatabaseCount('evaluaciones', 1);
+        // Solo la pregunta creada legítimamente arriba; ninguna de las dos
+        // peticiones manipuladas (crear y editar) llegó a tocarla.
+        $this->assertDatabaseCount('preguntas', 1);
+        $this->assertDatabaseHas('preguntas', ['id' => $pregunta->id, 'enunciado' => 'P1']);
     }
 
     public function test_formularios_de_login_y_registro(): void
@@ -68,6 +80,15 @@ class EntradaManipuladaTest extends TestCase
         $this->assertVuelveSinError(null, '/register', '/register', ['name' => ['x'], 'email' => ['y'], 'password' => 'secreto123', 'password_confirmation' => 'secreto123']);
 
         $this->assertDatabaseCount('empleados', 1);
+    }
+
+    public function test_formularios_de_recuperacion_de_contrasena(): void
+    {
+        $this->assertVuelveSinError(null, '/password/reset', '/password/email', ['email' => ['x']]);
+        $this->assertVuelveSinError(null, '/password/reset/token-falso', '/password/reset', [
+            'token' => 'token-falso', 'email' => ['x'], 'password' => 'secreto123', 'password_confirmation' => 'secreto123',
+        ]);
+        $this->assertVuelveSinError($this->admin, '/password/confirm', '/password/confirm', ['password' => ['x']]);
     }
 
     public function test_formulario_de_la_evaluacion_del_empleado(): void

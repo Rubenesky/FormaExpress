@@ -10,6 +10,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Un curso de formación: sus lecciones, su evaluación (como mucho una) y los
+ * empleados que lo tienen asignado.
+ */
 #[Fillable(['titulo', 'descripcion'])]
 class Curso extends Model
 {

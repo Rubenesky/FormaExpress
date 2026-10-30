@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('empleado_id')->constrained('empleados');
             $table->foreignId('evaluacion_id')->constrained('evaluaciones');
+            // Escala 0-10, 2 decimales (igual que nota_minima en evaluaciones).
             $table->decimal('nota', 4, 2);
             $table->timestamps();
         });

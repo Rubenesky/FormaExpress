@@ -13,6 +13,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Es la tabla de usuarios (login, roles) de toda la aplicación. Se llama
+ * "empleados" y no "users" porque el rol dominante del sistema es el
+ * empleado que se forma; administrador y encargado son los otros dos roles
+ * de la misma tabla (columna `rol`), no modelos aparte.
+ */
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable

@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * Una lección de un curso, con su orden de presentación al empleado.
+ */
 #[Fillable(['titulo', 'contenido', 'orden'])]
 class Leccion extends Model
 {

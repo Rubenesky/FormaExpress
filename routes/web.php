@@ -6,6 +6,7 @@ use App\Http\Controllers\ConsultaController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\EvaluacionController;
 use App\Http\Controllers\HacerEvaluacionController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LeccionController;
 use App\Http\Controllers\MisCursosController;
 use App\Http\Controllers\MisLogrosController;
@@ -17,7 +18,7 @@ Route::redirect('/', '/home');
 
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 // Formación del empleado: solo sus cursos asignados (Gates en AppServiceProvider).
 Route::middleware('auth')->group(function () {
