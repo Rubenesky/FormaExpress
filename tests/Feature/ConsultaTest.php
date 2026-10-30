@@ -106,7 +106,11 @@ class ConsultaTest extends TestCase
 
         $this->assertNotSame('', $contenido);
         $this->assertStringNotContainsString('<form', $contenido);
-        $this->assertStringNotContainsString('<button', $contenido);
+        // Los únicos <button> permitidos son los del modal de ayuda (no editan nada).
+        $this->assertSame(
+            substr_count($contenido, '<button'),
+            preg_match_all('/<button[^>]*data-bs-(?:toggle="modal"|dismiss="modal")/', $contenido)
+        );
         $this->assertDoesNotMatchRegularExpression('#/(create|edit|eliminar|asignaciones|evaluacion|pdf)\b#', $contenido);
         $this->assertDoesNotMatchRegularExpression('/method="(POST|PUT|DELETE)"|name="_method"/i', $contenido);
     }

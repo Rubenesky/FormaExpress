@@ -2,7 +2,14 @@
 
 @section('content')
 <div class="container">
-    <h1 class="h3 mb-3">Consulta de formación</h1>
+    <h1 class="h3 mb-3 d-flex align-items-center gap-2">
+        Consulta de formación
+        @include('partials.ayuda', ['id' => 'ayuda-consulta', 'titulo' => 'Consulta', 'parrafos' => [
+            'Esta pantalla busca empleados por su nombre (al menos 2 letras) para comprobar su formación.',
+            'Desde los resultados, el botón de cada fila abre la ficha del empleado: sus cursos, su progreso, sus certificados y sus insignias, sin que puedas editar nada.',
+            'Abrir una ficha queda registrado por protección de datos (RGPD); la búsqueda en sí no se registra porque no muestra datos de formación.',
+        ]])
+    </h1>
     <p class="text-muted">Busca a un empleado por su nombre para ver sus cursos, su progreso, sus certificados y sus insignias.</p>
 
     {{-- Búsqueda por GET: no modifica nada. --}}

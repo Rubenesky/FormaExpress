@@ -10,7 +10,14 @@
         </ol>
     </nav>
 
-    <h1 class="h3">{{ $evaluacion->titulo }}</h1>
+    <h1 class="h3 d-flex align-items-center gap-2">
+        {{ $evaluacion->titulo }}
+        @include('partials.ayuda', ['id' => 'ayuda-evaluacion-empleado', 'titulo' => 'Evaluación empleado', 'parrafos' => [
+            'Esta es la evaluación del curso: responde una opción en cada pregunta y pulsa «Enviar respuestas». Si dejas alguna sin responder, ese envío no cuenta como intento.',
+            'La nota es el porcentaje de aciertos sobre 10; los fallos no restan. Apruebas si llegas a la nota mínima indicada arriba.',
+            'Puedes repetir la evaluación tantas veces como quieras: se guardan todos los intentos. Al aprobar por primera vez consigues el certificado del curso automáticamente.',
+        ]])
+    </h1>
     <p class="text-muted">
         {{ $evaluacion->preguntas->count() }} {{ $evaluacion->preguntas->count() === 1 ? 'pregunta' : 'preguntas' }}
         · Aprobado con {{ $evaluacion->nota_minima }} sobre 10 · Responde todas las preguntas.

@@ -2,7 +2,13 @@
 
 @section('content')
 <div class="container">
-    <h1 class="h3 mb-3">Mis cursos</h1>
+    <h1 class="h3 mb-3 d-flex align-items-center gap-2">
+        Mis cursos
+        @include('partials.ayuda', ['id' => 'ayuda-mis-cursos', 'titulo' => 'Mis cursos', 'parrafos' => [
+            'Aquí ves los cursos que te han asignado, con cuántas lecciones llevas completadas y el porcentaje de progreso.',
+            'Si ya tienes el certificado de un curso, aparece marcado. Pulsa «Ver curso» para entrar y seguir con sus lecciones o su evaluación.',
+        ]])
+    </h1>
 
     @if ($cursos->isEmpty())
         <div class="alert alert-info">Todavía no tienes cursos asignados.</div>

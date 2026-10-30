@@ -10,7 +10,15 @@
     </nav>
 
     {{-- Ficha de solo lectura: ni enlaces de edición ni descarga del PDF. --}}
-    <h1 class="h3 mb-1">{{ $empleado->name }}</h1>
+    <h1 class="h3 mb-1 d-flex align-items-center gap-2">
+        {{ $empleado->name }}
+        @include('partials.ayuda', ['id' => 'ayuda-ficha', 'titulo' => 'Ficha del encargado', 'parrafos' => [
+            'Esta ficha muestra, solo para consultar, los cursos asignados a este empleado, con el progreso de cada uno.',
+            'También indica si está certificado en cada curso y en qué fecha, y qué insignias ha conseguido.',
+            'Es de solo lectura: no hay ningún botón para cambiar nada aquí.',
+            'Abrir esta ficha queda registrado (quién consulta, a quién y cuándo), tal como exige la protección de datos.',
+        ]])
+    </h1>
     <p class="text-muted">{{ $empleado->email }}</p>
 
     <h2 class="h5 mt-4">Cursos asignados</h2>

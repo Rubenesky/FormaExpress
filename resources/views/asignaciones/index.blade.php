@@ -9,7 +9,15 @@
         </ol>
     </nav>
 
-    <h1 class="h3 mb-3">Empleados asignados a «{{ $curso->titulo }}»</h1>
+    <h1 class="h3 mb-3 d-flex align-items-center gap-2">
+        Empleados asignados a «{{ $curso->titulo }}»
+        @include('partials.ayuda', ['id' => 'ayuda-asignaciones', 'titulo' => 'Asignaciones', 'parrafos' => [
+            'Esta pantalla asigna el curso a empleados y muestra quién lo tiene ya asignado.',
+            'El desplegable solo ofrece empleados que todavía no tienen el curso; al asignarlo se guarda la fecha.',
+            'La lista también indica si cada empleado ya tiene el certificado del curso, con un enlace para descargarlo.',
+            'Puedes desasignar un curso, pero no si el empleado ya ha completado alguna lección.',
+        ]])
+    </h1>
 
     <div class="card mb-4">
         <div class="card-header">Asignar el curso a un empleado</div>

@@ -2,7 +2,13 @@
 
 @section('content')
 <div class="container">
-    <h1 class="h3 mb-4">Mis logros</h1>
+    <h1 class="h3 mb-4 d-flex align-items-center gap-2">
+        Mis logros
+        @include('partials.ayuda', ['id' => 'ayuda-mis-logros', 'titulo' => 'Mis logros', 'parrafos' => [
+            'Esta pantalla reúne tus certificados y tus insignias.',
+            'Cada certificado tiene un botón para descargar el PDF. Las insignias se consiguen solas al cumplir ciertos hitos (tu primer certificado, cinco certificados, un 10 en una evaluación o aprobar a la primera); las que todavía no tienes aparecen como pendientes.',
+        ]])
+    </h1>
 
     <h2 class="h5">Certificados</h2>
     @if ($certificados->isEmpty())

@@ -10,7 +10,14 @@
     </nav>
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h3 mb-0">Lecciones de «{{ $curso->titulo }}»</h1>
+        <h1 class="h3 mb-0 d-flex align-items-center gap-2">
+            Lecciones de «{{ $curso->titulo }}»
+            @include('partials.ayuda', ['id' => 'ayuda-lecciones', 'titulo' => 'Lecciones', 'parrafos' => [
+                'Aquí ves las lecciones de un curso, en el orden en que se mostrarán a los empleados.',
+                '«Nueva lección» te pide un título, el número de orden y el contenido; los saltos de línea del contenido se conservan.',
+                'Puedes editar o eliminar una lección, pero no eliminarla si algún empleado ya la ha completado: ese historial no se borra.',
+            ]])
+        </h1>
         <a href="{{ route('cursos.lecciones.create', $curso) }}" class="btn btn-primary">Nueva lección</a>
     </div>
 

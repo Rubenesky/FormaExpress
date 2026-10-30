@@ -2,7 +2,14 @@
 
 @section('content')
 <div class="container">
-    <h1 class="h3 mb-1">Registro de consultas</h1>
+    <h1 class="h3 mb-1 d-flex align-items-center gap-2">
+        Registro de consultas
+        @include('partials.ayuda', ['id' => 'ayuda-registro-consultas', 'titulo' => 'Registro de consultas', 'parrafos' => [
+            'Esta pantalla, solo para administradores, registra quién ha abierto la ficha de qué empleado desde Consulta, y cuándo.',
+            'Es un registro exigido por protección de datos (RGPD): no se puede editar ni borrar desde la aplicación.',
+            'Se muestra de 25 en 25, empezando por la consulta más reciente.',
+        ]])
+    </h1>
     <p class="text-muted">Quién ha consultado la ficha de formación de qué empleado y cuándo (RGPD). Este registro no se puede editar ni borrar.</p>
 
     @if ($registros->isEmpty())

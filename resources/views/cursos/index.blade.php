@@ -3,7 +3,14 @@
 @section('content')
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h3 mb-0">Cursos</h1>
+        <h1 class="h3 mb-0 d-flex align-items-center gap-2">
+            Cursos
+            @include('partials.ayuda', ['id' => 'ayuda-cursos', 'titulo' => 'Cursos', 'parrafos' => [
+                'Esta pantalla lista todos los cursos del centro de formación: título, descripción y número de lecciones.',
+                'Con «Nuevo curso» creas uno; desde los botones de cada fila entras a sus lecciones, sus asignaciones o su evaluación, lo editas o lo eliminas.',
+                'Solo puedes eliminar un curso si ningún empleado tiene datos de formación en él (asignación, progreso, intentos o certificados); si los tiene, la aplicación te lo avisa en vez de borrarlo.',
+            ]])
+        </h1>
         <a href="{{ route('cursos.create') }}" class="btn btn-primary">Nuevo curso</a>
     </div>
 

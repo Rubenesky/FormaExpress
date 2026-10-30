@@ -11,8 +11,13 @@
     </nav>
 
     <div class="card">
-        <div class="card-header">
+        <div class="card-header d-flex align-items-center gap-2">
             <h1 class="h4 mb-0">{{ $leccion->titulo }}</h1>
+            @include('partials.ayuda', ['id' => 'ayuda-leccion', 'titulo' => 'Lección', 'parrafos' => [
+                'Aquí tienes el contenido de la lección.',
+                'El botón de abajo registra que la has terminado, con la fecha. Una vez usado no hace falta repetirlo.',
+                'Cuando hayas completado todas las lecciones del curso, se desbloqueará su evaluación (si la tiene).',
+            ]])
         </div>
         {{-- pre-line conserva los saltos de línea sin salir del escapado {{ }} --}}
         <div class="card-body" style="white-space: pre-line">{{ $leccion->contenido }}</div>

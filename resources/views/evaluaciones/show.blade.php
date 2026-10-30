@@ -9,14 +9,31 @@
         </ol>
     </nav>
 
+    @php($ayudaEvaluacionAdmin = [
+        'id' => 'ayuda-evaluacion-admin',
+        'titulo' => 'Evaluación admin',
+        'parrafos' => [
+            'Esta pantalla gestiona la evaluación tipo test del curso: cada curso tiene como mucho una.',
+            'Cada pregunta admite hasta 6 opciones; hay que marcar cuál es la correcta. Aquí, a diferencia de la vista del empleado, sí se ve la respuesta correcta de cada pregunta.',
+            'Puedes cambiar la nota mínima para aprobar y ver cuántos intentos han hecho ya los empleados.',
+            'Editar o eliminar preguntas que ya tienen intentos cambia el significado de esas notas; la aplicación lo avisa, pero no lo impide.',
+        ],
+    ])
+
     @if (! $evaluacion)
-        <h1 class="h3 mb-3">Evaluación de «{{ $curso->titulo }}»</h1>
+        <h1 class="h3 mb-3 d-flex align-items-center gap-2">
+            Evaluación de «{{ $curso->titulo }}»
+            @include('partials.ayuda', $ayudaEvaluacionAdmin)
+        </h1>
         <div class="alert alert-info">Este curso todavía no tiene evaluación.</div>
         <a href="{{ route('cursos.evaluacion.create', $curso) }}" class="btn btn-primary">Crear evaluación</a>
     @else
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
             <div>
-                <h1 class="h3 mb-1">{{ $evaluacion->titulo }}</h1>
+                <h1 class="h3 mb-1 d-flex align-items-center gap-2">
+                    {{ $evaluacion->titulo }}
+                    @include('partials.ayuda', $ayudaEvaluacionAdmin)
+                </h1>
                 <p class="text-muted mb-0">
                     Nota mínima para aprobar: <strong>{{ $evaluacion->nota_minima }}</strong> sobre 10
                     · {{ $evaluacion->preguntas->count() }} {{ $evaluacion->preguntas->count() === 1 ? 'pregunta' : 'preguntas' }}
