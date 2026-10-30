@@ -8,11 +8,11 @@ resultado dan hoy.
 
 ## 1. Resumen
 
-Resultado de ejecutar la batería completa el 4 de octubre de 2026:
+Resultado de ejecutar la batería completa el 30 de octubre de 2026:
 
 | Tests | Aserciones | Fallos | Errores | Omitidos |
 |---|---|---|---|---|
-| **140** | **658** | 0 | 0 | 0 |
+| **165** | **727** | 0 | 0 | 0 |
 
 | Módulo | Archivos | Tests | Aserciones |
 |---|---|---|---|
@@ -21,8 +21,10 @@ Resultado de ejecutar la batería completa el 4 de octubre de 2026:
 | Evaluaciones | `EvaluacionAdminTest`, `HacerEvaluacionTest` | 34 | 182 |
 | Certificados e insignias | `CertificadoTest`, `InsigniaTest` | 19 | 56 |
 | Consulta del encargado y registro RGPD | `ConsultaTest` | 15 | 90 |
-| Transversales (acceso, registro, idioma, formularios manipulados) | `AutenticacionTest`, `EntradaManipuladaTest`, `Feature/ExampleTest`, `Unit/ExampleTest` | 21 | 110 |
-| **Total** | 13 archivos | **140** | **658** |
+| Sistema de ayuda en línea | `AyudaTest` | 4 | 29 |
+| Transversales (acceso, registro, idioma, formularios manipulados) | `AutenticacionTest`, `EntradaManipuladaTest`, `Feature/ExampleTest`, `Unit/ExampleTest` | 22 | 127 |
+| Pruebas de unidad (nota, aprobado, progreso e insignias) | `CalificadorTest`, `LogrosTest` | 20 | 23 |
+| **Total** | 16 archivos | **165** | **727** |
 
 Una *aserción* es cada comprobación individual dentro de un test (por ejemplo,
 "la respuesta es 200" o "la tabla tiene 1 fila"). Un test pasa solo si pasan
@@ -32,16 +34,27 @@ todas sus aserciones.
 
 ## 2. Tipo de pruebas
 
-**Todas las pruebas reales son de integración (*feature tests* de Laravel).
-No hay pruebas unitarias reales.**
+**La batería tiene dos tipos de prueba reales: 20 de unidad (`Calificador` y
+`Logros::hitos()`) y 144 de integración (*feature tests* de Laravel).**
 
-- La carpeta `tests/Unit` solo contiene `ExampleTest::test_that_true_is_true`,
-  el ejemplo que trae Laravel al instalarlo. Comprueba que `true` es `true`: no
-  prueba nada del proyecto. Se cuenta en el total de 140 pero no aporta
-  cobertura.
-- Los otros 139 tests están en `tests/Feature`. Cada uno arranca la aplicación
-  Laravel completa, crea en una base de datos los datos que necesita (salvo los
-  3 de `Feature/ExampleTest`, que no crean ninguno), simula
+- **Pruebas de unidad** (`tests/Unit/CalificadorTest.php` y
+  `tests/Unit/LogrosTest.php`, 20 tests): prueban lógica de cálculo extraída
+  de los modelos Eloquent a `app/Support/`, sin Eloquent ni base de datos.
+  `App\Support\Calificador::nota()`, `::aprueba()` y `::progreso()` calculan
+  la nota de una evaluación, si aprueba y el % de progreso de un curso a
+  partir de números sueltos. `App\Support\Logros::hitos()` decide qué
+  insignias corresponden a un resultado (aprobado, nota, si es el primer
+  intento, cuántos certificados tiene ya) sin guardar nada. Son de unidad de
+  verdad porque: extienden `PHPUnit\Framework\TestCase` directamente (no
+  `Tests\TestCase`), no usan `RefreshDatabase` ni tocan la base de datos, no
+  hacen ninguna petición HTTP, y cada test pasa una entrada concreta y
+  comprueba la salida exacta de un método estático. La carpeta `tests/Unit`
+  también sigue teniendo `ExampleTest::test_that_true_is_true`, el ejemplo
+  que trae Laravel al instalarlo: no prueba nada del proyecto, se cuenta en
+  el total pero no aporta cobertura.
+- Los 144 tests de integración están en `tests/Feature`. Cada uno arranca la
+  aplicación Laravel completa, crea en una base de datos los datos que
+  necesita (salvo los 3 de `Feature/ExampleTest`, que no crean ninguno), simula
   peticiones HTTP (como si fuera el navegador: `GET /cursos`, `POST /cursos`…)
   y comprueba lo que se indica abajo. Casi todas las peticiones se hacen con la
   sesión iniciada como un usuario de un rol concreto; se hacen sin sesión las de
@@ -52,10 +65,11 @@ No hay pruebas unitarias reales.**
     errores de validación y su mensaje en español);
   - el estado de la base de datos después (filas creadas, borradas o sin
     cambios).
-- Algunos tests comprueban lógica concreta sin pasar por HTTP (por ejemplo, que
-  la base de datos impide duplicar una insignia, o que un seeder es
-  idempotente), pero también usan la aplicación y la base de datos reales, así
-  que siguen siendo de integración.
+- Algunos tests de integración comprueban lógica concreta sin pasar por HTTP
+  (por ejemplo, que la base de datos impide duplicar una insignia, o que un
+  seeder es idempotente), pero a diferencia de los de unidad de arriba sí
+  usan Eloquent y la base de datos real, así que siguen siendo de
+  integración.
 
 **Base de datos de las pruebas:** SQLite en memoria (configurado en
 `phpunit.xml`), no MySQL, así que los tests no tocan los datos de la
@@ -66,7 +80,10 @@ piden `/`, `/home` y `/login`, o comprueban que `true` es `true`).
 
 **Qué no hay** (para no presentarlo como cubierto):
 
-- Pruebas unitarias aisladas de clases o métodos.
+- Pruebas de unidad de otra lógica aparte de `Calificador` y `Logros::hitos()`.
+  Por ejemplo, `App\Support\EntradaAntigua::limpiar()` también es un método
+  estático puro (sin Eloquent ni base de datos), pero solo tiene cobertura
+  indirecta, vía el test de integración `EntradaManipuladaTest`.
 - Pruebas en navegador o de extremo a extremo (*E2E*): no se ejecuta JavaScript
   ni se comprueba el aspecto visual.
 - Pruebas contra MySQL: las restricciones de clave foránea se prueban en
@@ -103,7 +120,7 @@ prepara sus propios datos.
 
 ### Qué significa el resultado
 
-- Al final aparece una línea como **`Tests:    140 passed (658 assertions)`** y el
+- Al final aparece una línea como **`Tests:    165 passed (727 assertions)`** y el
   comando termina con código de salida `0`: todo está bien.
 - Si algún test falla, aparece marcado como `FAIL` con el nombre del test, la
   aserción que no se cumplió (valor esperado frente a valor obtenido) y el
@@ -133,7 +150,7 @@ longitud, caracteres especiales y máscaras**. Esto es lo que hay, tal cual:
 | Empleado a asignar | id de un encargado, de un administrador o inexistente (`99999`) | Error "El empleado seleccionado no es válido." y ninguna asignación | `AsignacionTest::test_solo_se_asigna_a_empleados` |
 | Empleado a asignar | vacío | Error "El campo empleado es obligatorio." | ídem |
 | Opción correcta de una pregunta | ninguna marcada / una vacía marcada / dos marcadas (petición manipulada que envía un array) | "Marca cuál es la opción correcta." / "La opción marcada como correcta está vacía." / error en `correcta`; en los tres casos no se guarda nada | `EvaluacionAdminTest::test_una_pregunta_necesita_exactamente_una_correcta` |
-| Cualquier campo de texto de todos los formularios | un **array** en lugar de texto (petición manipulada, p. ej. `titulo[]=x`) | Se rechaza, vuelve al formulario con el error y la página carga (nunca un error 500); no se guarda nada | `EntradaManipuladaTest` (5 tests, 50 aserciones) |
+| Cualquier campo de texto de todos los formularios | un **array** en lugar de texto (petición manipulada, p. ej. `titulo[]=x`) | Se rechaza, vuelve al formulario con el error y la página carga (nunca un error 500); no se guarda nada | `EntradaManipuladaTest` (6 tests, 67 aserciones) |
 | Respuesta de la evaluación | la opción correcta de **otra** pregunta | Cuenta como fallo (nota 0) | `HacerEvaluacionTest::test_una_opcion_de_otra_pregunta_cuenta_como_fallo` |
 | Correo del registro | `esto-no-es-un-correo` | "El campo correo electrónico debe ser un correo electrónico válido.", sin errores en los demás campos; no se crea la cuenta ni se inicia sesión | `AutenticacionTest::test_el_registro_rechaza_un_email_con_formato_invalido` |
 
@@ -204,8 +221,44 @@ con su regla `email`; su caso inválido está en la tabla de tipos de dato.
 
 ## 5. Pruebas por módulo
 
-Todos los tests de esta sección son de integración (ver el apartado 2). En cada
-tabla, la columna *Comprueba* resume la entrada y la salida esperada.
+En cada tabla, la columna *Comprueba* resume la entrada y la salida esperada.
+La sección 5.0 es de unidad; las secciones 5.1 a 5.6 son de integración (ver
+el apartado 2).
+
+### 5.0. Pruebas de unidad (20 tests, 23 aserciones)
+
+Prueban directamente los métodos estáticos de `app/Support/`, sin Eloquent,
+sin base de datos y sin HTTP (ver el apartado 2).
+
+**`CalificadorTest`** (11 tests)
+
+| Test | Comprueba |
+|---|---|
+| `test_nota_calcula_el_porcentaje_de_aciertos_sobre_diez` | `nota(4, 5)` → `8.0` |
+| `test_nota_con_decimales_periodicos_redondea_a_dos_decimales` | `nota(1, 3)` → `3.33` (1/3 × 10 = 3,333…, redondeado) |
+| `test_nota_sin_preguntas_es_cero` | `nota(0, 0)` → `0.0` |
+| `test_nota_con_todo_fallado_es_cero` | `nota(0, 5)` → `0.0` |
+| `test_nota_con_todo_acertado_es_diez` | `nota(5, 5)` → `10.0` |
+| `test_aprueba_con_nota_igual_a_la_minima` | `aprueba(8.0, 8.0)` → `true` |
+| `test_aprueba_falla_por_una_centesima` | `aprueba(7.99, 8.0)` → `false` |
+| `test_aprueba_evita_el_error_de_coma_flotante_en_el_limite` | `aprueba(8.1 − 0.1, 8.0)` → `true` (8,1 − 0,1 da 7,999999999999999 en coma flotante; en céntimos enteros sigue siendo 8,00) |
+| `test_progreso_sin_lecciones_es_cero` | `progreso(0, 0)` → `0` |
+| `test_progreso_redondea_decimales_periodicos` | `progreso(1, 3)` → `33` (1/3 × 100 = 33,333…, redondeado) |
+| `test_progreso_completo_es_cien` | `progreso(5, 5)` → `100` |
+
+**`LogrosTest`** (9 tests) — todos llaman a `Logros::hitos(aprobado, nota, esPrimerIntento, certificadosTotales)`
+
+| Test | Comprueba |
+|---|---|
+| `test_primer_intento_aprobado_concede_la_insignia_a_la_primera` | `(true, 7.0, true, 1)` → incluye `PRIMER_INTENTO` |
+| `test_no_concede_a_la_primera_si_hubo_intentos_previos` | `(true, 7.0, false, 1)` → no incluye `PRIMER_INTENTO` |
+| `test_nota_maxima_solo_se_concede_con_un_diez_exacto` | `(true, 9.99, false, 0)` → no incluye `NOTA_MAXIMA` |
+| `test_nota_maxima_se_concede_con_un_diez` | `(true, 10.0, false, 1)` → incluye `NOTA_MAXIMA` |
+| `test_primer_certificado_se_concede_con_un_certificado` | `(true, 7.0, false, 1)` → incluye `PRIMER_CERTIFICADO`, no incluye `CINCO_CERTIFICADOS` |
+| `test_cinco_certificados_se_concede_a_partir_del_quinto` | `(true, 7.0, false, 5)` → incluye `PRIMER_CERTIFICADO` y `CINCO_CERTIFICADOS` |
+| `test_cuatro_certificados_no_concede_la_insignia_de_cinco` | `(true, 7.0, false, 4)` → no incluye `CINCO_CERTIFICADOS` |
+| `test_sin_certificados_no_concede_ninguna_insignia_de_certificados` | `(false, 5.0, false, 0)` → no incluye `PRIMER_CERTIFICADO` ni `CINCO_CERTIFICADOS` |
+| `test_suspender_sin_certificados_previos_no_concede_ninguna_insignia` | `(false, 5.0, false, 0)` → `[]` (lista vacía) |
 
 ### 5.1. Cursos y lecciones (29 tests, 132 aserciones)
 
@@ -381,7 +434,7 @@ tabla, la columna *Comprueba* resume la entrada y la salida esperada.
 | `test_un_empleado_no_accede_a_nada_del_modulo` | 403 |
 | `test_los_enlaces_del_menu_segun_el_rol` | Menú según el rol |
 
-### 5.6. Pruebas transversales (21 tests, 110 aserciones)
+### 5.6. Pruebas transversales (22 tests, 127 aserciones)
 
 No pertenecen a un módulo concreto, pero cubren el acceso y la robustez de toda
 la aplicación.
@@ -403,12 +456,13 @@ la aplicación.
 | `test_el_registro_exige_una_contrasena_de_al_menos_8_caracteres` | Contraseña de 7 caracteres → error en la contraseña, sin cuenta ni sesión |
 | `test_el_registro_rechaza_un_email_ya_registrado` | Correo ya usado → error en el correo; sigue habiendo una sola cuenta con él |
 
-**`EntradaManipuladaTest`** (5 tests)
+**`EntradaManipuladaTest`** (6 tests)
 
 | Test | Comprueba |
 |---|---|
-| `test_formularios_del_administrador` | Arrays en los campos de texto de todos los formularios del administrador → error y sin 500 |
+| `test_formularios_del_administrador` | Arrays en los campos de texto de todos los formularios del administrador, incluidos crear evaluación y editar pregunta → error y sin 500 |
 | `test_formularios_de_login_y_registro` | Lo mismo en login y registro |
+| `test_formularios_de_recuperacion_de_contrasena` | Lo mismo en `/password/email`, `/password/reset` y `/password/confirm`. El caso de `/password/confirm` encontró un `TypeError` real (500): `password` manipulado como array llegaba a `password_verify()`. Ya corregido en `ConfirmPasswordController` (commit `0968142`) |
 | `test_formulario_de_la_evaluacion_del_empleado` | Lo mismo en la evaluación |
 | `test_que_se_guarda_para_old_al_volver` | Solo se recuerda lo válido; nunca contraseñas |
 | `test_los_valores_normales_se_conservan_al_volver` | Los valores correctos se mantienen al volver con un error |
@@ -428,7 +482,9 @@ Laravel y no prueba nada del proyecto (ver el apartado 2).
 
 ## 6. Limitaciones de la batería
 
-- No hay pruebas unitarias reales; toda la cobertura es de integración.
+- La cobertura de unidad se limita a `Calificador` y `Logros::hitos()`; el
+  resto de la aplicación (incluida `EntradaAntigua`, ya aislada pero sin test
+  de unidad propio) solo tiene cobertura de integración.
 - Las pruebas usan SQLite, no MySQL. Las restricciones de clave foránea y los
   índices únicos se comprueban en SQLite.
 - De las longitudes máximas, solo se prueba la del título del curso.
