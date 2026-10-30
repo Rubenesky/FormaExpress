@@ -188,6 +188,10 @@ nada de eso en el repositorio).
   del administrador lo avisan, pero no lo impiden.
 - Salida siempre con `{{ }}`; los saltos de línea se conservan con CSS
   `white-space: pre-line`, no con `nl2br` (que obligaría a usar `{!! !!}`).
+- La auditoría de uso de clases/métodos deprecated se hizo contra PHP 8.3.35
+  (el del entorno local), no contra PHP 8.4.25 (el del servidor de
+  InfinityFree); no se ha verificado si hay deprecations específicas de 8.4
+  en producción.
 
 ### Resuelto (no reabrir)
 - **Formularios con arrays manipulados** (`titulo[]=x`): al fallar la
